@@ -34,7 +34,7 @@ class RichUI:
         table.add_column("任务描述")
         
         for task in tasks:
-            status = "[green]✓[/green]" if task.get('done', False) else "[yellow]⏳[/yellow]"
+            status = "[green]✓ 完成[/green]" if task.get('done', False) else "[yellow]待执行[/yellow]"
             desc = task.get('description', str(task))
             table.add_row(status, desc)
         
@@ -43,7 +43,7 @@ class RichUI:
     
     def print_task_start(self, task_desc: str):
         """Print when starting a task."""
-        self.console.print(f"\n[bold cyan]▶ 任务:[/bold cyan] {task_desc}")
+        self.console.print(f"\n[bold cyan]开始执行任务:[/bold cyan] {task_desc}")
     
     def print_task_done(self, task_desc: str):
         """Print when a task is completed."""
@@ -114,13 +114,13 @@ class RichUI:
         )
         self.console.print(panel)
     
-    def _parse_value_investment_sections(self, answer: str):
+    def _parse_value_investment_sections(self, answer: str) -> dict[str, str]:
         """Parse value investment analysis into sections."""
-        sections = {}
+        sections: dict[str, str] = {}
         lines = answer.split('\n')
         
-        current_section = None
-        current_content = []
+        current_section: str | None = None
+        current_content: list[str] = []
         
         for line in lines:
             line = line.strip()
@@ -173,7 +173,7 @@ def show_progress(message: str, success_message: str = ""):
     def decorator(func):
         def wrapper(*args, **kwargs):
             ui = RichUI()
-            ui.console.print(f"[cyan]⏳ {message}[/cyan]")
+            ui.console.print(f"[cyan]正在执行: {message}[/cyan]")
             try:
                 result = func(*args, **kwargs)
                 if success_message:
