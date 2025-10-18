@@ -22,7 +22,6 @@ Gems 能够将复杂的投资问题转化为清晰、分步骤的研究计划。
 - Python 3.10 或更高版本
 - [uv](https://github.com/astral-sh/uv) 包管理器
 - DeepSeek API 密钥
-- FinnHub API 密钥 (在 [finnhub.io](https://finnhub.io) 获取)
 
 ### 安装
 
@@ -44,7 +43,6 @@ cp env.example .env
 
 # 编辑 .env 文件并添加您的 API 密钥
 # DEEPSEEK_API_KEY=your-deepseek-api-key
-# FINNHUB_API_KEY=your-finnhub-api-key
 ```
 
 ### 使用方式
@@ -57,10 +55,6 @@ uv run gems-agent
 ### 示例查询
 
 尝试向 Gems 提问，例如:
-- "苹果公司过去4个季度的收入增长情况如何？"
-- "比较微软和谷歌2023年的营业利润率"
-- "分析特斯拉过去一年的现金流趋势"
-- "基于最近的财务数据，亚马逊的负债权益比是多少？"
 - "贵州茅台的市盈率和市净率是多少？"
 - "分析宁德时代的财务健康状况"
 
@@ -87,7 +81,7 @@ gems/
 │   ├── gems/
 │   │   ├── agent.py      # 主智能体编排逻辑
 │   │   ├── model.py      # LLM 接口
-│   │   ├── tools.py      # 财务数据工具
+│   │   ├── tools/        # 财务数据工具
 │   │   ├── prompts.py    # 各组件系统提示词
 │   │   ├── schemas.py    # Pydantic 模型
 │   │   ├── utils/        # 工具函数
