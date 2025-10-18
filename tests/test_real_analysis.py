@@ -16,7 +16,7 @@ print("🚀 使用真实LLM进行股票分析测试")
 print("=" * 50)
 
 try:
-    from gems.agent_fixed import Agent
+    from gems.agent import Agent
     
     # 创建代理实例
     agent = Agent()
