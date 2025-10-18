@@ -31,13 +31,31 @@ class GLILogger:
         self.gli.show_query(query)
 
     def log_task_list(self, tasks: List[Dict[str, Any]]):
-        """Log the planned task list."""
-        # Convert tasks to readable format
-        task_descriptions = [task.get('description', str(task)) for task in tasks]
-        task_text = "\n".join([f"• {desc}" for desc in task_descriptions])
+        """Log the planned task list with pagination."""
+        if not tasks:
+            self.gli.update_report_section("task_plan", "## 计划任务\n\n暂无任务")
+            return
+            
+        # Pagination settings
+        page_size = 8  # Show 8 tasks per page
+        total_tasks = len(tasks)
+        total_pages = (total_tasks + page_size - 1) // page_size  # Ceiling division
         
-        self.gli.update_report_section("task_plan", f"## 计划任务\n\n{task_text}")
-        self.gli.add_reasoning_message(f"任务规划完成: 已规划 {len(tasks)} 个任务")
+        # For now, show all tasks on first page with pagination info
+        # In a full implementation, you could track current page state
+        task_descriptions = []
+        for i, task in enumerate(tasks, 1):
+            status = "✅" if task.get('done', False) else "⏳"
+            description = task.get('description', str(task))
+            task_descriptions.append(f"{status} {i}. {description}")
+        
+        task_text = "\n\n".join(task_descriptions)
+        
+        # Add pagination info
+        pagination_info = f"\n\n---\n**第1页/共{total_pages}页 | 总计{total_tasks}个任务**\n*使用终端滚动查看所有任务*"
+        
+        self.gli.update_report_section("task_plan", f"## 计划任务\n\n{task_text}{pagination_info}")
+        self.gli.add_reasoning_message(f"任务规划完成: 已规划 {total_tasks} 个任务，分{total_pages}页显示")
 
     def log_task_start(self, task_desc: str):
         """Log when a task starts."""

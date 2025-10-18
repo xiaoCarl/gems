@@ -5,7 +5,7 @@ from langchain_core.messages import AIMessage
 from gems.model import call_llm
 from gems.prompts import (
     ACTION_SYSTEM_PROMPT,
-    ANSWER_SYSTEM_PROMPT,
+    VALUE_INVESTMENT_ANSWER_PROMPT,
     PLANNING_SYSTEM_PROMPT,
     TOOL_ARGS_SYSTEM_PROMPT,
     VALIDATION_SYSTEM_PROMPT,
@@ -247,17 +247,31 @@ class Agent:
         {all_results}
         
         Based on the data above, provide a comprehensive value investment analysis.
-        Structure your answer around the three dimensions of value investing:
+        Structure your answer around the two core dimensions of value investing:
+        
         1. Good Business (好生意)
-        2. Good Price (好价格) 
-        3. Long-term Holding Risk (长期持有风险)
+           - Moat Analysis (护城河)
+           - Management Quality (管理层质量) 
+           - Business Simplicity (业务简单易懂)
+           - Free Cash Flow (自由现金流)
+        
+        2. Good Price (好价格)
+           - PE Valuation (市盈率估值)
+           - PB Valuation (市净率估值) 
+           - ROC Metrics (资本回报率)
+           - Margin of Safety (安全边际)
         
         For each dimension, provide:
-        - Clear assessment (满足/不满足/部分满足)
+        - Clear assessment (优秀/良好/一般/较差)
         - Specific data and analysis
         - Key supporting metrics
+        - Risk factors
         
-        Conclude with an overall investment recommendation.
+        Conclude with an overall investment recommendation including:
+        - Whether it meets "good business + good price" criteria
+        - Suggested position sizing
+        - Key risks to monitor
+        - Long-term holding value assessment
         """
-        answer_obj = call_llm(answer_prompt, system_prompt=ANSWER_SYSTEM_PROMPT, output_schema=Answer)
+        answer_obj = call_llm(answer_prompt, system_prompt=VALUE_INVESTMENT_ANSWER_PROMPT, output_schema=Answer)
         return answer_obj.answer
