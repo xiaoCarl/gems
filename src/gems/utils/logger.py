@@ -1,12 +1,17 @@
-from gems.utils.rich_ui import RichUI
+"""
+Logger class that uses the new opencode-style UI system.
+"""
+
+from typing import List, Dict, Any
+from gems.ui.terminal import get_ui
 
 
 class Logger:
-    """Logger that uses the new interactive UI system."""
+    """Logger that uses the new opencode-style interactive UI system."""
     
     def __init__(self):
-        self.ui = RichUI()
-        self.log = []
+        self.ui = get_ui()
+        self.log: List[str] = []
 
     def _log(self, msg: str):
         """Print immediately and keep in log."""
@@ -14,29 +19,43 @@ class Logger:
         self.log.append(msg)
 
     def log_header(self, msg: str):
-        self.ui.print_header(msg)
+        """Log a header message."""
+        self.ui.show_info(msg)
     
     def log_user_query(self, query: str):
-        self.ui.print_user_query(query)
+        """Log the user's query."""
+        self.ui.show_query(query)
 
-    def log_task_list(self, tasks):
-        self.ui.print_task_list(tasks)
+    def log_task_list(self, tasks: List[Dict[str, Any]]):
+        """Log the planned task list."""
+        self.ui.show_task_planning(tasks)
 
     def log_task_start(self, task_desc: str):
-        self.ui.print_task_start(task_desc)
+        """Log when a task starts."""
+        self.ui.show_progress_start(f"开始执行: {task_desc}")
 
     def log_task_done(self, task_desc: str):
-        self.ui.print_task_done(task_desc)
+        """Log when a task is completed."""
+        self.ui.show_progress_complete(f"完成: {task_desc}")
 
     def log_tool_run(self, tool: str, result: str = ""):
-        self.ui.print_tool_run(tool, str(result)[:100])
+        """Log when a tool is executed."""
+        self.ui.show_tool_execution(tool, "", str(result))
 
     def log_risky(self, tool: str, input_str: str):
-        self.ui.print_warning(f"Risky action {tool}({input_str}) — auto-confirmed")
+        """Log risky actions."""
+        self.ui.show_warning(f"风险操作 {tool}({input_str}) — 已自动确认")
 
     def log_summary(self, summary: str):
-        self.ui.print_answer(summary)
+        """Log the final summary/answer."""
+        # Detect if this is a value investment analysis
+        if any(keyword in summary for keyword in ["好生意", "好价格", "长期持有风险"]):
+            self.ui.show_answer(summary, "value_investment")
+        else:
+            self.ui.show_answer(summary, "general")
     
     def progress(self, message: str, success_message: str = ""):
-        """Return a progress context manager for showing loading states."""
-        return self.ui.progress(message, success_message)
+        """Show progress for an operation."""
+        self.ui.show_progress_start(message)
+        if success_message:
+            self.ui.show_progress_complete(success_message)

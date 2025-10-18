@@ -5,12 +5,19 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from gems.agent import Agent
-from gems.utils.intro import print_intro
+from gems.gli.terminal import GLITerminal, get_gli
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import InMemoryHistory
 
+
 def main():
-    print_intro()
+    # Initialize the GLI system
+    gli = get_gli()
+    
+    # Show welcome screen
+    gli.show_welcome()
+    
+    # Initialize agent
     agent = Agent()
 
     # Check if running in interactive terminal
@@ -26,12 +33,18 @@ def main():
         try:
             query = prompt_func()
             if query.lower() in ["exit", "quit"]:
-                print("Goodbye!")
+                gli.show_info("再见!")
                 break
             if query:
-                agent.run(query)
+                # Start live display for this query
+                gli.start_live_display()
+                try:
+                    agent.run(query)
+                finally:
+                    # Stop live display after processing
+                    gli.stop_live_display()
         except (KeyboardInterrupt, EOFError):
-            print("\nGoodbye!")
+            gli.show_info("\n再见!")
             break
 
 

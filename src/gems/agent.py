@@ -13,18 +13,16 @@ from gems.prompts import (
 from gems.schemas import Answer, IsDone, OptimizedToolArgs, Task, TaskList, ValueInvestmentAnswer
 from gems.tools import TOOLS
 from langchain_core.tools import BaseTool
-from gems.utils.logger import Logger
-from gems.utils.rich_ui import show_progress
+from gems.gli.logger import GLILogger
 
 
 class Agent:
     def __init__(self, max_steps: int = 20, max_steps_per_task: int = 5):
-        self.logger = Logger()
+        self.logger = GLILogger()
         self.max_steps = max_steps            # global safety cap
         self.max_steps_per_task = max_steps_per_task
 
     # ---------- task planning ----------
-    @show_progress("Planning tasks...", "Tasks planned")
     def plan_tasks(self, query: str) -> List[Task]:
         tool_descriptions = "\n".join([f"- {getattr(t, 'name', 'unknown')}: {getattr(t, 'description', 'No description')}" for t in TOOLS])
         prompt = f"""
@@ -45,7 +43,6 @@ class Agent:
         return tasks
 
     # ---------- ask LLM what to do ----------
-    @show_progress("Thinking...", "")
     def ask_for_actions(self, task_desc: str, last_outputs: str = "") -> AIMessage:
         # last_outputs = textual feedback of what we just tried
         prompt = f"""
@@ -63,7 +60,6 @@ class Agent:
             return AIMessage(content="Failed to get actions.")
 
     # ---------- ask LLM if task is done ----------
-    @show_progress("Validating...", "")
     def ask_if_done(self, task_desc: str, recent_results: str) -> bool:
         prompt = f"""
         We were trying to complete the task: "{task_desc}".
@@ -78,7 +74,6 @@ class Agent:
             return False
 
     # ---------- optimize tool arguments ----------
-    @show_progress("Optimizing tool call...", "")
     def optimize_tool_args(self, tool_name: str, initial_args: dict, task_desc: str) -> dict:
         """Optimize tool arguments based on task requirements."""
         tool = next((t for t in TOOLS if getattr(t, 'name', None) == tool_name), None)
@@ -116,11 +111,10 @@ class Agent:
     # ---------- tool execution ----------
     def _execute_tool(self, tool, tool_name: str, inp_args):
         """Execute a tool with progress indication."""
-        # Create a dynamic decorator with the tool name
-        @show_progress(f"Executing {tool_name}...", "")
-        def run_tool():
-            return tool.run(inp_args)
-        return run_tool()
+        self.logger.log_task_start(f"执行工具: {tool_name}")
+        result = tool.run(inp_args)
+        self.logger.log_task_done(f"工具执行完成: {tool_name}")
+        return result
     
     # ---------- confirm action ----------
     def confirm_action(self, tool: str, input_str: str) -> bool:
@@ -243,7 +237,6 @@ class Agent:
         return answer
     
     # ---------- answer generation ----------
-    @show_progress("Generating answer...", "Answer ready")
     def _generate_answer(self, query: str, session_outputs: list) -> str:
         """Generate the final answer based on collected data."""
         all_results = "\n\n".join(session_outputs) if session_outputs else "No data was collected."
