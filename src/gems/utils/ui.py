@@ -155,14 +155,15 @@ class UI:
         # Answer content with proper line wrapping
         print(f"{Colors.BLUE}║{Colors.ENDC}{' ' * (width - 2)}{Colors.BLUE}║{Colors.ENDC}")
         for line in answer.split('\n'):
-            if len(line) == 0:
+            if len(line.strip()) == 0:
+                # Empty line - just show borders with space
                 print(f"{Colors.BLUE}║{Colors.ENDC}{' ' * (width - 2)}{Colors.BLUE}║{Colors.ENDC}")
             else:
                 # Word wrap long lines
                 words = line.split()
                 current_line = ""
                 for word in words:
-                    if len(current_line) + len(word) + 1 <= width - 6:
+                    if len(current_line) + len(word) + 1 <= width - 4:  # Account for borders and spaces
                         current_line += word + " "
                     else:
                         if current_line:
