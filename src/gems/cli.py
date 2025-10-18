@@ -1,3 +1,9 @@
+"""
+简单CLI入口 - 重构版本
+
+使用重构后的简单输出系统，移除rich依赖。
+"""
+
 import sys
 from dotenv import load_dotenv
 
@@ -5,47 +11,62 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from gems.agent import Agent
-from gems.gli.terminal import GLITerminal, get_gli
-from prompt_toolkit import PromptSession
-from prompt_toolkit.history import InMemoryHistory
+
+
+def show_welcome():
+    """显示欢迎界面"""
+    welcome_text = """
+🎯 Gems Agent - 价值投资分析
+
+╔══════════════════════════════════════════════════╗
+║        AI金融分析助手 --- 价值投资分析             ║
+╚══════════════════════════════════════════════════╝
+
+       Great Enterprises at Moderate Prices 
+
+    ██████╗    ███████╗  ███╗   ███╗  ███████╗
+    ██╔════╝   ██╔════╝  ████╗ ████║  ██╔════╝
+    ██║  ███╗  █████╗    ██╔████╔██║  ███████╗
+    ██║   ██║  ██╔══╝    ██║╚██╔╝██║  ╚════██║
+    ╚██████╔╝  ███████╗  ██║ ╚═╝ ██║  ███████║
+    ╚═════╝   ╚══════╝  ╚═╝     ╚═╝  ╚══════╝
+
+                     好生意，好价格   
+
+请输入股票名称或者代码，或者输入'exit'或'quit'退出。
+"""
+    print(welcome_text)
 
 
 def main():
-    # Initialize the GLI system
-    gli = get_gli()
-    
+    """主函数"""
     # Show welcome screen
-    gli.show_welcome()
+    show_welcome()
     
     # Initialize agent
     agent = Agent()
 
-    # Check if running in interactive terminal
-    if sys.stdin.isatty():
-        # Create a prompt session with history support for interactive terminals
-        session = PromptSession(history=InMemoryHistory())
-        prompt_func = lambda: session.prompt(">> ")
-    else:
-        # Use simple input for non-interactive environments
-        prompt_func = lambda: input(">> ")
-
     while True:
         try:
-            query = prompt_func()
-            if query.lower() in ["exit", "quit"]:
-                gli.show_info("再见!")
+            # Get user input
+            query = input("\n>> ").strip()
+            
+            if query.lower() in ["exit", "quit", "退出"]:
+                print("ℹ 再见!")
                 break
-            if query:
-                # Start live display for this query
-                gli.start_live_display()
-                try:
-                    agent.run(query)
-                finally:
-                    # Stop live display after processing
-                    gli.stop_live_display()
+            
+            if not query:
+                continue
+            
+            # Process the query
+            agent.run(query)
+            
         except (KeyboardInterrupt, EOFError):
-            gli.show_info("\n再见!")
+            print("\nℹ 再见!")
             break
+        except Exception as e:
+            print(f"✗ 发生错误: {e}")
+            continue
 
 
 if __name__ == "__main__":

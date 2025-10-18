@@ -11,12 +11,10 @@ requires-python = ">=3.10"
 dependencies = [
     "langchain>=0.3.27",
     "langchain-deepseek>=0.1.0",
-    "prompt-toolkit>=3.0.0",
     "pydantic>=2.11.10",
     "python-dotenv>=1.1.1",
     "requests>=2.32.5",
     "akshare>=1.15.0",
-    "rich>=13.0.0",
 ]
 
 [project.scripts]

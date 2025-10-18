@@ -35,3 +35,10 @@ class ValueInvestmentAnswer(BaseModel):
     assessment: ValueInvestmentAssessment = Field(..., description="The value investment assessment across three dimensions.")
     summary: str = Field(..., description="A concise summary of the investment analysis.")
     key_metrics: Dict[str, Any] = Field(default_factory=dict, description="Key financial metrics used in the analysis.")
+
+class StockConfirmation(BaseModel):
+    """Represents stock information confirmation."""
+    stock_name: str = Field(..., description="Confirmed stock name or code.")
+    analysis_type: str = Field(..., description="Type of analysis to be performed.")
+    analysis_dimensions: List[str] = Field(..., description="Key dimensions for analysis.")
+    clarification_needed: str = Field("", description="Any clarification needed from user.")
