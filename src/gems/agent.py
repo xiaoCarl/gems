@@ -14,7 +14,7 @@ from gems.schemas import Answer, IsDone, OptimizedToolArgs, Task, TaskList, Valu
 from gems.tools import TOOLS
 from langchain_core.tools import BaseTool
 from gems.utils.logger import Logger
-from gems.utils.ui import show_progress
+from gems.utils.rich_ui import show_progress
 
 
 class Agent:

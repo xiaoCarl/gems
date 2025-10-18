@@ -1,11 +1,11 @@
-from gems.utils.ui import UI
+from gems.utils.rich_ui import RichUI
 
 
 class Logger:
     """Logger that uses the new interactive UI system."""
     
     def __init__(self):
-        self.ui = UI()
+        self.ui = RichUI()
         self.log = []
 
     def _log(self, msg: str):
