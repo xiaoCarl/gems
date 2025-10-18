@@ -167,10 +167,14 @@ class UI:
                         current_line += word + " "
                     else:
                         if current_line:
-                            print(f"{Colors.BLUE}║{Colors.ENDC} {current_line.ljust(width - 4)} {Colors.BLUE}║{Colors.ENDC}")
+                            # Remove trailing space and pad to full width
+                            padded_line = current_line.rstrip().ljust(width - 4)
+                            print(f"{Colors.BLUE}║{Colors.ENDC} {padded_line} {Colors.BLUE}║{Colors.ENDC}")
                         current_line = word + " "
                 if current_line:
-                    print(f"{Colors.BLUE}║{Colors.ENDC} {current_line.ljust(width - 4)} {Colors.BLUE}║{Colors.ENDC}")
+                    # Remove trailing space and pad to full width
+                    padded_line = current_line.rstrip().ljust(width - 4)
+                    print(f"{Colors.BLUE}║{Colors.ENDC} {padded_line} {Colors.BLUE}║{Colors.ENDC}")
         
         print(f"{Colors.BLUE}║{Colors.ENDC}{' ' * (width - 2)}{Colors.BLUE}║{Colors.ENDC}")
         
