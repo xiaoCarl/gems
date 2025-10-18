@@ -1,129 +1,137 @@
-# Gems 🤖
+# Gems 🤖 价值投资分析智能体
 
-Gems is an autonomous financial research agent that thinks, plans, and learns as it works. It performs analysis using task planning, self-reflection, and real-time market data. Think Claude Code, but built specifically for financial research.
+Gems 是一个自主的价值投资研究智能体，能够思考、规划和学习。它通过任务规划、自我反思和实时市场数据进行深度分析。专为价值投资分析而构建的智能研究助手。
 
+## 概述
 
-<img width="979" height="651" alt="Screenshot 2025-10-14 at 6 12 35 PM" src="https://github.com/user-attachments/assets/5a2859d4-53cf-4638-998a-15cef3c98038" />
+Gems 能够将复杂的投资问题转化为清晰、分步骤的研究计划。它使用实时市场数据执行这些任务，检查自己的工作，并不断优化结果，直到得出有数据支撑的可靠答案。
 
-## Overview
+这不仅仅是另一个聊天机器人。这是一个能够提前规划、验证进度并持续迭代直到任务完成的智能体。
 
-Gems takes complex financial questions and turns them into clear, step-by-step research plans. It runs those tasks using live market data, checks its own work, and refines the results until it has a confident, data-backed answer.  
+**核心能力:**
+- **智能任务规划**: 自动将复杂查询分解为结构化的研究步骤
+- **自主执行**: 选择并执行合适的工具来收集财务数据
+- **自我验证**: 检查工作成果并迭代直到任务完成
+- **实时财务数据**: 访问利润表、资产负债表和现金流量表
+- **安全特性**: 内置循环检测和步骤限制，防止无限执行
 
-It's not just another chatbot.  It's an agent that plans ahead, verifies its progress, and keeps iterating until the job is done.
+## 快速开始
 
-**Key Capabilities:**
-- **Intelligent Task Planning**: Automatically decomposes complex queries into structured research steps
-- **Autonomous Execution**: Selects and executes the right tools to gather financial data
-- **Self-Validation**: Checks its own work and iterates until tasks are complete
-- **Real-Time Financial Data**: Access to income statements, balance sheets, and cash flow statements
-- **Safety Features**: Built-in loop detection and step limits to prevent runaway execution
+### 环境要求
 
-[![Twitter Follow](https://img.shields.io/twitter/follow/virattt?style=social)](https://twitter.com/virattt)
+- Python 3.10 或更高版本
+- [uv](https://github.com/astral-sh/uv) 包管理器
+- DeepSeek API 密钥
+- FinnHub API 密钥 (在 [finnhub.io](https://finnhub.io) 获取)
 
-## Quick Start
+### 安装
 
-### Prerequisites
-
-- Python 3.10 or higher
-- [uv](https://github.com/astral-sh/uv) package manager
-- DeepSeek API key
-- FinnHub API key (get one at [finnhub.io](https://finnhub.io))
-
-### Installation
-
-1. Clone the repository:
+1. 克隆仓库:
 ```bash
-git clone https://github.com/virattt/gems.git
+git clone https://github.com/xiaoCarl/gems.git
 cd gems
 ```
 
-2. Install dependencies with uv:
+2. 使用 uv 安装依赖:
 ```bash
 uv sync
 ```
 
-3. Set up your environment variables:
+3. 设置环境变量:
 ```bash
-# Copy the example environment file
+# 复制环境变量示例文件
 cp env.example .env
 
-# Edit .env and add your API keys
+# 编辑 .env 文件并添加您的 API 密钥
 # DEEPSEEK_API_KEY=your-deepseek-api-key
 # FINNHUB_API_KEY=your-finnhub-api-key
 ```
 
-### Usage
+### 使用方式
 
-Run Gems in interactive mode:
+在交互模式下运行 Gems:
 ```bash
 uv run gems-agent
 ```
 
-### Example Queries
+### 示例查询
 
-Try asking Gems questions like:
-- "What was Apple's revenue growth over the last 4 quarters?"
-- "Compare Microsoft and Google's operating margins for 2023"
-- "Analyze Tesla's cash flow trends over the past year"
-- "What is Amazon's debt-to-equity ratio based on recent financials?"
+尝试向 Gems 提问，例如:
+- "苹果公司过去4个季度的收入增长情况如何？"
+- "比较微软和谷歌2023年的营业利润率"
+- "分析特斯拉过去一年的现金流趋势"
+- "基于最近的财务数据，亚马逊的负债权益比是多少？"
+- "贵州茅台的市盈率和市净率是多少？"
+- "分析宁德时代的财务健康状况"
 
-Gems will automatically:
-1. Break down your question into research tasks
-2. Fetch the necessary financial data
-3. Perform calculations and analysis
-4. Provide a comprehensive, data-rich answer
+Gems 将自动:
+1. 将您的问题分解为研究任务
+2. 获取必要的财务数据
+3. 执行计算和分析
+4. 提供全面、数据丰富的答案
 
-## Architecture
+## 架构设计
 
-Gems uses a multi-agent architecture with specialized components:
+Gems 采用多智能体架构，包含专门化的组件:
 
-- **Planning Agent**: Analyzes queries and creates structured task lists
-- **Action Agent**: Selects appropriate tools and executes research steps
-- **Validation Agent**: Verifies task completion and data sufficiency
-- **Answer Agent**: Synthesizes findings into comprehensive responses
+- **规划智能体**: 分析查询并创建结构化的任务列表
+- **执行智能体**: 选择合适的工具并执行研究步骤
+- **验证智能体**: 验证任务完成情况和数据充分性
+- **回答智能体**: 将发现综合为全面的回答
 
-## Project Structure
+## 项目结构
 
 ```
 gems/
 ├── src/
 │   ├── gems/
-│   │   ├── agent.py      # Main agent orchestration logic
-│   │   ├── model.py      # LLM interface
-│   │   ├── tools.py      # Financial data tools
-│   │   ├── prompts.py    # System prompts for each component
-│   │   ├── schemas.py    # Pydantic models
-│   │   ├── utils/        # Utility functions
-│   │   └── cli.py        # CLI entry point
+│   │   ├── agent.py      # 主智能体编排逻辑
+│   │   ├── model.py      # LLM 接口
+│   │   ├── tools.py      # 财务数据工具
+│   │   ├── prompts.py    # 各组件系统提示词
+│   │   ├── schemas.py    # Pydantic 模型
+│   │   ├── utils/        # 工具函数
+│   │   └── cli.py        # CLI 入口点
 ├── pyproject.toml
 └── uv.lock
 ```
 
-## Configuration
+## 配置
 
-Gems supports configuration via the `Agent` class initialization:
+Gems 支持通过 `Agent` 类初始化进行配置:
 
 ```python
 from gems.agent import Agent
 
 agent = Agent(
-    max_steps=20,              # Global safety limit
-    max_steps_per_task=5       # Per-task iteration limit
+    max_steps=20,              # 全局安全限制
+    max_steps_per_task=5       # 每个任务的迭代限制
 )
 ```
 
-## How to Contribute
+## 如何贡献
 
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+1. Fork 本仓库
+2. 创建功能分支
+3. 提交您的更改
+4. 推送到分支
+5. 创建 Pull Request
 
-**Important**: Please keep your pull requests small and focused.  This will make it easier to review and merge.
+**重要**: 请保持您的 pull request 小而专注，这将使审查和合并更容易。
 
+## 许可证
 
-## License
+本项目采用 MIT 许可证。
 
-This project is licensed under the MIT License.
+## 价值投资理念
+
+Gems 基于经典价值投资理念构建，专注于:
+- 基本面分析
+- 财务比率计算
+- 现金流分析
+- 盈利能力评估
+- 风险评估
+- 估值分析
+
+通过智能化的数据收集和分析，帮助投资者做出更明智的投资决策。
 
