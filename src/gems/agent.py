@@ -10,7 +10,7 @@ from gems.prompts import (
     TOOL_ARGS_SYSTEM_PROMPT,
     VALIDATION_SYSTEM_PROMPT,
 )
-from gems.schemas import Answer, IsDone, OptimizedToolArgs, Task, TaskList
+from gems.schemas import Answer, IsDone, OptimizedToolArgs, Task, TaskList, ValueInvestmentAnswer
 from gems.tools import TOOLS
 from langchain_core.tools import BaseTool
 from gems.utils.logger import Logger
@@ -253,8 +253,18 @@ class Agent:
         Data and results collected from tools:
         {all_results}
         
-        Based on the data above, provide a comprehensive answer to the user's query.
-        Include specific numbers, calculations, and insights.
+        Based on the data above, provide a comprehensive value investment analysis.
+        Structure your answer around the three dimensions of value investing:
+        1. Good Business (好生意)
+        2. Good Price (好价格) 
+        3. Long-term Holding Risk (长期持有风险)
+        
+        For each dimension, provide:
+        - Clear assessment (满足/不满足/部分满足)
+        - Specific data and analysis
+        - Key supporting metrics
+        
+        Conclude with an overall investment recommendation.
         """
         answer_obj = call_llm(answer_prompt, system_prompt=ANSWER_SYSTEM_PROMPT, output_schema=Answer)
         return answer_obj.answer

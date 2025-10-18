@@ -22,3 +22,16 @@ class Answer(BaseModel):
 class OptimizedToolArgs(BaseModel):
     """Represents optimized arguments for a tool call."""
     arguments: Dict[str, Any] = Field(..., description="The optimized arguments dictionary for the tool call.")
+
+class ValueInvestmentAssessment(BaseModel):
+    """Represents a comprehensive value investment assessment."""
+    good_business: str = Field(..., description="Assessment of whether it's a good business, including moat, profitability, and business model analysis.")
+    good_price: str = Field(..., description="Assessment of whether it's a good price, including valuation metrics, safety margin, and comparison analysis.")
+    long_term_risk: str = Field(..., description="Assessment of long-term holding risks, including industry outlook, competition, and management quality.")
+    overall_recommendation: str = Field(..., description="Overall investment recommendation based on the three dimensions.")
+
+class ValueInvestmentAnswer(BaseModel):
+    """Represents a comprehensive value investment answer."""
+    assessment: ValueInvestmentAssessment = Field(..., description="The value investment assessment across three dimensions.")
+    summary: str = Field(..., description="A concise summary of the investment analysis.")
+    key_metrics: Dict[str, Any] = Field(default_factory=dict, description="Key financial metrics used in the analysis.")
