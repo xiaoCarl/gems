@@ -1,7 +1,7 @@
 from langchain.tools import tool
 from typing import Optional, Literal
 from pydantic import BaseModel, Field
-from gems.tools.api import call_api
+# from gems.tools.api import call_api  # 暂时禁用美国SEC文件功能
 from gems.tools.constants import (
     ITEMS_10K_MAP,
     ITEMS_10Q_MAP,
@@ -25,29 +25,29 @@ class FilingsInput(BaseModel):
     )
 
 
-@tool(args_schema=FilingsInput)
-def get_filings(
-    ticker: str,
-    filing_type: Optional[Literal["10-K", "10-Q", "8-K"]] = None,
-    limit: int = 10
-) -> list[dict]:
-    """
-    Retrieves metadata for SEC filings for a company. Returns accession numbers, filing types, and document URLs.
-
-    This tool ONLY returns metadata - it does NOT return the actual text content from filings.
-    To retrieve text content, use the specific filing items tools: get_10K_filing_items,
-    get_10Q_filing_items, or get_8K_filing_items.
-
-    Note: FinnHub filings API may have different filtering capabilities than Financial Datasets.
-    """
-    params = {"symbol": ticker}
-    if filing_type is not None:
-        # FinnHub may not support direct filing_type filtering in the same way
-        params["form"] = filing_type
-
-    data = call_api("/stock/filings", params)
-    # Transform FinnHub response to match expected format
-    return data if isinstance(data, list) else []
+# @tool(args_schema=FilingsInput)
+# def get_filings(
+#     ticker: str,
+#     filing_type: Optional[Literal["10-K", "10-Q", "8-K"]] = None,
+#     limit: int = 10
+# ) -> list[dict]:
+#     """
+#     Retrieves metadata for SEC filings for a company. Returns accession numbers, filing types, and document URLs.
+# 
+#     This tool ONLY returns metadata - it does NOT return the actual text content from filings.
+#     To retrieve text content, use the specific filing items tools: get_10K_filing_items,
+#     get_10Q_filing_items, or get_8K_filing_items.
+# 
+#     Note: FinnHub filings API may have different filtering capabilities than Financial Datasets.
+#     """
+#     params = {"symbol": ticker}
+#     if filing_type is not None:
+#         # FinnHub may not support direct filing_type filtering in the same way
+#         params["form"] = filing_type
+# 
+#     data = call_api("/stock/filings", params)
+#     # Transform FinnHub response to match expected format
+#     return data if isinstance(data, list) else []
 
 
 class Filing10KItemsInput(BaseModel):
@@ -59,47 +59,47 @@ class Filing10KItemsInput(BaseModel):
     )
 
 
-@tool(args_schema=Filing10KItemsInput)
-def get_10K_filing_items(
-    ticker: str,
-    year: int,
-    item: list[str] | None = None
-) -> dict:
-    """
-    Retrieves specific sections (items) from a company's 10-K annual report.
-    
-    Use this to extract detailed information from specific sections of a 10-K filing, such as:
-    - Item-1: Business
-    - Item-1A: Risk Factors
-    - Item-7: Management's Discussion and Analysis
-    - Item-8: Financial Statements and Supplementary Data
-    
-    The optional 'item' parameter allows you to filter for specific sections. If not provided,
-    all available items will be returned.
-    
-    Returns a dictionary containing:
-    - resource: "filing_items"
-    - ticker: The company ticker
-    - cik: The company's CIK number
-    - filing_type: "10-K"
-    - accession_number: The SEC accession number for the filing
-    - year: The filing year
-    - items: List of items, each with 'number', 'title', and 'text' fields
-    """
-    params = {
-        "ticker": ticker.upper(),
-        "filing_type": "10-K",
-        "year": year
-    }
-
-    # Note: FinnHub may not support detailed item extraction like Financial Datasets
-    # This is a simplified implementation
-    if item is not None:
-        # Convert list to comma-separated string
-        params["item"] = ",".join(item)
-
-    data = call_api("/filings/items/", params)
-    return data
+# @tool(args_schema=Filing10KItemsInput)
+# def get_10K_filing_items(
+#     ticker: str,
+#     year: int,
+#     item: list[str] | None = None
+# ) -> dict:
+#     """
+#     Retrieves specific sections (items) from a company's 10-K annual report.
+#     
+#     Use this to extract detailed information from specific sections of a 10-K filing, such as:
+#     - Item-1: Business
+#     - Item-1A: Risk Factors
+#     - Item-7: Management's Discussion and Analysis
+#     - Item-8: Financial Statements and Supplementary Data
+#     
+#     The optional 'item' parameter allows you to filter for specific sections. If not provided,
+#     all available items will be returned.
+#     
+#     Returns a dictionary containing:
+#     - resource: "filing_items"
+#     - ticker: The company ticker
+#     - cik: The company's CIK number
+#     - filing_type: "10-K"
+#     - accession_number: The SEC accession number for the filing
+#     - year: The filing year
+#     - items: List of items, each with 'number', 'title', and 'text' fields
+#     """
+#     params = {
+#         "ticker": ticker.upper(),
+#         "filing_type": "10-K",
+#         "year": year
+#     }
+# 
+#     # Note: FinnHub may not support detailed item extraction like Financial Datasets
+#     # This is a simplified implementation
+#     if item is not None:
+#         # Convert list to comma-separated string
+#         params["item"] = ",".join(item)
+# 
+#     data = call_api("/filings/items/", params)
+#     return data
 
 
 class Filing10QItemsInput(BaseModel):
@@ -112,50 +112,50 @@ class Filing10QItemsInput(BaseModel):
     )
 
 
-@tool(args_schema=Filing10QItemsInput)
-def get_10Q_filing_items(
-    ticker: str,
-    year: int,
-    quarter: int,
-    item: list[str] | None = None
-) -> dict:
-    """
-    Retrieves specific sections (items) from a company's 10-Q quarterly report.
-    
-    Use this to extract detailed information from specific sections of a 10-Q filing, such as:
-    - Item-1: Financial Statements
-    - Item-2: Management's Discussion and Analysis
-    - Item-3: Quantitative and Qualitative Disclosures About Market Risk
-    - Item-4: Controls and Procedures
-    
-    The optional 'item' parameter allows you to filter for specific sections. If not provided,
-    all available items will be returned.
-    
-    Returns a dictionary containing:
-    - resource: "filing_items"
-    - ticker: The company ticker
-    - cik: The company's CIK number
-    - filing_type: "10-Q"
-    - accession_number: The SEC accession number for the filing
-    - year: The filing year
-    - quarter: The filing quarter (1-4)
-    - items: List of items, each with 'number', 'title', and 'text' fields
-    """
-    params = {
-        "ticker": ticker.upper(),
-        "filing_type": "10-Q",
-        "year": year,
-        "quarter": quarter
-    }
-
-    # Note: FinnHub may not support detailed item extraction like Financial Datasets
-    # This is a simplified implementation
-    if item is not None:
-        # Convert list to comma-separated string
-        params["item"] = ",".join(item)
-
-    data = call_api("/filings/items/", params)
-    return data
+# @tool(args_schema=Filing10QItemsInput)
+# def get_10Q_filing_items(
+#     ticker: str,
+#     year: int,
+#     quarter: int,
+#     item: list[str] | None = None
+# ) -> dict:
+#     """
+#     Retrieves specific sections (items) from a company's 10-Q quarterly report.
+#     
+#     Use this to extract detailed information from specific sections of a 10-Q filing, such as:
+#     - Item-1: Financial Statements
+#     - Item-2: Management's Discussion and Analysis
+#     - Item-3: Quantitative and Qualitative Disclosures About Market Risk
+#     - Item-4: Controls and Procedures
+#     
+#     The optional 'item' parameter allows you to filter for specific sections. If not provided,
+#     all available items will be returned.
+#     
+#     Returns a dictionary containing:
+#     - resource: "filing_items"
+#     - ticker: The company ticker
+#     - cik: The company's CIK number
+#     - filing_type: "10-Q"
+#     - accession_number: The SEC accession number for the filing
+#     - year: The filing year
+#     - quarter: The filing quarter (1-4)
+#     - items: List of items, each with 'number', 'title', and 'text' fields
+#     """
+#     params = {
+#         "ticker": ticker.upper(),
+#         "filing_type": "10-Q",
+#         "year": year,
+#         "quarter": quarter
+#     }
+# 
+#     # Note: FinnHub may not support detailed item extraction like Financial Datasets
+#     # This is a simplified implementation
+#     if item is not None:
+#         # Convert list to comma-separated string
+#         params["item"] = ",".join(item)
+# 
+#     data = call_api("/filings/items/", params)
+#     return data
 
 
 class Filing8KItemsInput(BaseModel):
@@ -167,50 +167,50 @@ class Filing8KItemsInput(BaseModel):
     )
 
 
-@tool(args_schema=Filing8KItemsInput)
-def get_8K_filing_items(
-    ticker: str,
-    accession_number: str,
-    item: list[str] | None = None
-) -> dict:
-    """
-    Retrieves specific sections (items) from a company's 8-K current report.
-    
-    8-K filings report material events such as acquisitions, financial results, 
-    management changes, and other significant corporate events.
-    
-    The accession_number parameter can be retrieved using the get_filings tool by 
-    filtering for 8-K filings.
-    
-    Common 8-K items include:
-    - Item-1.01: Entry into a Material Definitive Agreement
-    - Item-2.02: Results of Operations and Financial Condition
-    - Item-5.02: Departure/Election of Directors or Principal Officers
-    - Item-8.01: Other Events
-    
-    The optional 'item' parameter allows you to filter for specific sections. If not provided,
-    all available items will be returned.
-    
-    Returns a dictionary containing:
-    - resource: "filing_items"
-    - ticker: The company ticker
-    - cik: The company's CIK number
-    - filing_type: "8-K"
-    - accession_number: The SEC accession number for the filing
-    - items: List of items, each with 'number', 'title', and 'text' fields
-    """
-    params = {
-        "ticker": ticker.upper(),
-        "filing_type": "8-K",
-        "accession_number": accession_number
-    }
-
-    # Note: FinnHub may not support detailed item extraction like Financial Datasets
-    # This is a simplified implementation
-    if item is not None:
-        # Convert list to comma-separated string
-        params["item"] = ",".join(item)
-
-    data = call_api("/filings/items/", params)
-    return data
+# @tool(args_schema=Filing8KItemsInput)
+# def get_8K_filing_items(
+#     ticker: str,
+#     accession_number: str,
+#     item: list[str] | None = None
+# ) -> dict:
+#     """
+#     Retrieves specific sections (items) from a company's 8-K current report.
+#     
+#     8-K filings report material events such as acquisitions, financial results, 
+#     management changes, and other significant corporate events.
+#     
+#     The accession_number parameter can be retrieved using the get_filings tool by 
+#     filtering for 8-K filings.
+#     
+#     Common 8-K items include:
+#     - Item-1.01: Entry into a Material Definitive Agreement
+#     - Item-2.02: Results of Operations and Financial Condition
+#     - Item-5.02: Departure/Election of Directors or Principal Officers
+#     - Item-8.01: Other Events
+#     
+#     The optional 'item' parameter allows you to filter for specific sections. If not provided,
+#     all available items will be returned.
+#     
+#     Returns a dictionary containing:
+#     - resource: "filing_items"
+#     - ticker: The company ticker
+#     - cik: The company's CIK number
+#     - filing_type: "8-K"
+#     - accession_number: The SEC accession number for the filing
+#     - items: List of items, each with 'number', 'title', and 'text' fields
+#     """
+#     params = {
+#         "ticker": ticker.upper(),
+#         "filing_type": "8-K",
+#         "accession_number": accession_number
+#     }
+# 
+#     # Note: FinnHub may not support detailed item extraction like Financial Datasets
+#     # This is a simplified implementation
+#     if item is not None:
+#         # Convert list to comma-separated string
+#         params["item"] = ",".join(item)
+# 
+#     data = call_api("/filings/items/", params)
+#     return data
 

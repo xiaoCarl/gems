@@ -5,10 +5,15 @@
 """
 
 import sys
+import logging
 from dotenv import load_dotenv
 
 # Load environment variables BEFORE importing any gems modules
 load_dotenv()
+
+# 禁用httpx的HTTP请求日志
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
 
 from gems.agent import Agent
 

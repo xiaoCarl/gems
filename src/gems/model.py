@@ -17,7 +17,7 @@ from gems.prompts import DEFAULT_SYSTEM_PROMPT
 def _get_llm():
     """Initialize the appropriate LLM based on environment variables."""
     # Check for QwQ configuration
-    if os.getenv("USE_QWQ3") == "true":
+    if os.getenv("USE_QWEN") == "true":
         api_key = os.getenv("DASHSCOPE_API_KEY")
         if not api_key:
             raise ValueError("DASHSCOPE_API_KEY environment variable is required for QwQ")

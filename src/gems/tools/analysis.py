@@ -8,7 +8,7 @@
 from langchain.tools import tool
 from typing import Literal, Optional
 from pydantic import BaseModel, Field
-from gems.tools.api import call_api, call_akshare_stock_financials
+# 延迟导入以避免循环导入
 
 
 class MoatAnalysisInput(BaseModel):
@@ -30,7 +30,8 @@ def analyze_moat_characteristics(ticker: str, period: Literal["annual", "quarter
     返回包含护城河评分和详细分析的字典。
     """
     # 获取财务数据用于护城河分析
-    financial_data = call_akshare_stock_financials(ticker, period)
+    from gems.api import get_stock_financials
+    financial_data = get_stock_financials(ticker, period)
     
     # 护城河分析逻辑
     moat_analysis = {
@@ -123,7 +124,8 @@ def calculate_free_cash_flow_metrics(ticker: str, period: Literal["annual", "qua
     返回自由现金流分析和关键指标。
     """
     # 获取现金流数据
-    cash_flow_data = call_akshare_stock_financials(ticker, period)
+    from gems.api import get_stock_financials
+    cash_flow_data = get_stock_financials(ticker, period)
     
     fcf_analysis = {
         "ticker": ticker,
@@ -163,55 +165,54 @@ class ValuationRatiosInput(BaseModel):
 @tool(args_schema=ValuationRatiosInput)
 def compute_valuation_ratios(ticker: str, period: Literal["annual", "quarterly"]) -> dict:
     """
-    计算估值比率，包括PE、PB、ROC等指标。
+    计算估值比率，基于财务数据和估值数据进行价值投资分析。
     
-    计算关键估值指标：
-    - PE Ratio：市盈率（历史、行业比较）
-    - PB Ratio：市净率（净资产质量分析）
-    - ROC：资本回报率（盈利能力评估）
-    - EV/EBITDA：企业价值倍数
-    
-    返回估值分析和安全边际评估。
+    分析内容：
+    1. 获取最新PE、PB、ROE等估值指标
+    2. 基于财务数据进行深度分析
+    3. 提供价值投资评估建议
     """
-    # 获取财务数据和市场数据
-    financial_data = call_akshare_stock_financials(ticker, period)
-    
-    valuation_analysis = {
-        "ticker": ticker,
-        "period": period,
-        "pe_ratio": {
-            "current": "当前PE",
-            "historical_range": "历史PE区间",
-            "industry_average": "行业平均PE",
-            "assessment": "PE估值评估"
-        },
-        "pb_ratio": {
-            "current": "当前PB",
-            "net_asset_quality": "净资产质量",
-            "historical_comparison": "历史PB比较",
-            "assessment": "PB估值评估"
-        },
-        "roc_metrics": {
-            "return_on_capital": "资本回报率",
-            "return_on_equity": "净资产收益率",
-            "trend": "回报率趋势",
-            "assessment": "盈利能力评估"
-        },
-        "ev_ebitda": {
-            "current": "当前EV/EBITDA",
-            "industry_comparison": "行业比较",
-            "assessment": "企业价值评估"
-        },
-        "margin_of_safety": {
-            "estimated_intrinsic_value": "估计内在价值",
-            "current_price": "当前价格",
-            "discount": "安全边际折扣",
-            "assessment": "安全边际评估"
-        },
-        "overall_valuation_score": 0.0
-    }
-    
-    return {"valuation_analysis": valuation_analysis}
+    try:
+        # 1. 获取估值数据
+        from gems.api import get_stock_valuation_data, get_stock_financials
+        valuation_data = get_stock_valuation_data(ticker)
+        
+        # 2. 获取财务数据用于深度分析
+        financial_data = get_stock_financials(ticker, period)
+        
+        # 3. 估值评估
+        pe_ratio = valuation_data.get('pe_ratio', 0)
+        pb_ratio = valuation_data.get('pb_ratio', 0)
+        roe = valuation_data.get('roe', 0)
+        
+        pe_assessment = "低估" if pe_ratio < 15 else "高估" if pe_ratio > 25 else "合理"
+        pb_assessment = "低估" if pb_ratio < 1.0 else "高估" if pb_ratio > 2.5 else "合理"
+        roe_assessment = "优秀" if roe > 15 else "良好" if roe > 10 else "一般"
+        
+        # 4. 综合分析
+        analysis = {
+            "ticker": ticker,
+            "period": period,
+            "current_valuation": {
+                "pe_ratio": pe_ratio,
+                "pb_ratio": pb_ratio,
+                "roe": roe,
+                "eps": valuation_data.get('eps', 0),
+                "bvps": valuation_data.get('bvps', 0)
+            },
+            "valuation_assessment": {
+                "pe_assessment": pe_assessment,
+                "pb_assessment": pb_assessment,
+                "roe_assessment": roe_assessment
+            },
+            "investment_recommendation": f"基于当前估值水平，PE{pe_assessment}，PB{pb_assessment}，ROE{roe_assessment}",
+            "data_sources": ["AkShare财务数据", "估值计算"]
+        }
+        
+        return {"comprehensive_valuation_analysis": analysis}
+        
+    except Exception as e:
+        return {"error": f"综合估值分析失败: {str(e)}"}
 
 
 class BusinessSimplicityInput(BaseModel):
