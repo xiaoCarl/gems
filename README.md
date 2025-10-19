@@ -127,26 +127,6 @@ Gems 采用双数据源架构，充分利用各数据源的优势：
 - 财务数据（季报、年报） → AkShare
 - 备用实时数据 → AkShare（当通达信不可用时）
 
-## 项目结构
-
-```
-gems/
-├── src/
-│   ├── gems/
-│   │   ├── agent.py      # 主智能体编排逻辑
-│   │   ├── model.py      # LLM 接口
-│   │   ├── tools/        # 财务数据工具
-│   │   ├── prompts.py    # 各组件系统提示词
-│   │   ├── schemas.py    # Pydantic 模型
-│   │   ├── utils/        # 工具函数
-│   │   ├── output/       # 简单输出系统
-│   │   │   ├── core.py   # 输出引擎
-│   │   │   └── logger.py # 日志记录
-│   │   └── cli.py        # CLI 入口点
-├── pyproject.toml
-└── uv.lock
-```
-
 ## 配置
 
 Gems 支持通过 `Agent` 类初始化进行配置:
