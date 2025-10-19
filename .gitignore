@@ -24,6 +24,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+*.tgz
 
 # Virtual environments
 venv/
@@ -53,7 +54,8 @@ yarn-error.log*
 .cursor/
 
 #opencode
-GITHUB_PLUS_GUIDE.md
-RELEASE_V0.1.md
+GITHUB_PUSH_GUIDE.md
+RELEASE_v0.1.md
 VERSION_v0.1_SUMMARY.md
 gems-v0.1.bundle
+*.old
