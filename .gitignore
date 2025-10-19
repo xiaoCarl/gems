@@ -30,6 +30,7 @@ venv/
 env/
 ENV/
 .venv
+.mypy_cache/
 
 # Node.js
 node_modules/
@@ -50,3 +51,9 @@ yarn-error.log*
 
 # Cursor files
 .cursor/
+
+#opencode
+GITHUB_PLUS_GUIDE.md
+RELEASE_V0.1.md
+VERSION_v0.1_SUMMARY.md
+gems-v0.1.bundle

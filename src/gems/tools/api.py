@@ -1,6 +1,6 @@
 import os
 import requests
-import akshare as ak
+import akshare as ak  # type: ignore
 
 ####################################
 # API Configuration

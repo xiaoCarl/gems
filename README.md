@@ -21,7 +21,7 @@ Gems 能够将复杂的投资问题转化为清晰、分步骤的研究计划。
 
 - Python 3.10 或更高版本
 - [uv](https://github.com/astral-sh/uv) 包管理器
-- DeepSeek API 密钥
+- DeepSeek API 密钥 或 DashScope API 密钥（用于Qwen3）
 
 ### 安装
 
@@ -42,7 +42,12 @@ uv sync
 cp env.example .env
 
 # 编辑 .env 文件并添加您的 API 密钥
+# 对于 DeepSeek:
 # DEEPSEEK_API_KEY=your-deepseek-api-key
+# 
+# 对于 Qwen:
+# USE_QWEN=true
+# DASHSCOPE_API_KEY=your-dashscope-api-key
 ```
 
 ### 使用方式
@@ -68,6 +73,20 @@ Gems 将自动:
 2. 获取必要的财务数据
 3. 执行计算和分析
 4. 提供全面、数据丰富的答案
+
+## 支持的模型
+
+Gems 支持多种大语言模型:
+
+### DeepSeek (默认)
+默认使用 DeepSeek 模型，需要设置 `DEEPSEEK_API_KEY` 环境变量。
+
+### Qwen
+要使用 Qwen-plus 模型，请设置以下环境变量:
+```bash
+USE_QWEN=true
+DASHSCOPE_API_KEY=your-dashscope-api-key
+```
 
 ## 架构设计
 
@@ -129,10 +148,10 @@ agent = Agent(
 
 ### 重构后的改进
 
-- **🚀 性能提升**: 移除复杂UI依赖，启动速度更快
-- **🔧 维护简化**: 依赖更少，代码更简洁
-- **📊 专注核心**: 专注于财务分析功能，而非界面渲染
-- **💪 稳定性增强**: 简单输出系统更可靠，减少潜在错误
+- 🚀 **性能提升**: 移除复杂UI依赖，启动速度更快
+- 🔧 **维护简化**: 依赖更少，代码更简洁
+- 📊 **专注核心**: 专注于财务分析功能，而非界面渲染
+- 💪 **稳定性增强**: 简单输出系统更可靠，减少潜在错误
 
 ### 价值投资理念
 
@@ -207,4 +226,3 @@ flowchart TD
 - **循环检测**: 防止重复执行相同操作
 - **步骤限制**: 全局和每个任务的执行次数限制
 - **工具确认**: 在执行潜在风险操作前进行确认
-

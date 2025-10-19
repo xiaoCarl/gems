@@ -19,7 +19,7 @@ def show_welcome():
 🎯 Gems Agent - 价值投资分析
 
 ╔══════════════════════════════════════════════════╗
-║        AI金融分析助手 --- 价值投资分析             ║
+║        AI金融分析助手 --- 价值投资分析            ║
 ╚══════════════════════════════════════════════════╝
 
        Great Enterprises at Moderate Prices 
@@ -52,7 +52,7 @@ def main():
             query = input("\n>> ").strip()
             
             if query.lower() in ["exit", "quit", "退出"]:
-                print("ℹ 再见!")
+                print("再见!")
                 break
             
             if not query:
@@ -62,7 +62,7 @@ def main():
             agent.run(query)
             
         except (KeyboardInterrupt, EOFError):
-            print("\nℹ 再见!")
+            print("\n 再见!")
             break
         except Exception as e:
             print(f"✗ 发生错误: {e}")
