@@ -1,7 +1,7 @@
 """
-端到端测试脚本
+核心模块测试脚本
 
-测试重构后的简单输出系统是否能正常工作。
+测试核心模块的导入和基本功能，不依赖外部API。
 """
 
 import sys
@@ -9,6 +9,12 @@ import os
 
 # 添加src目录到Python路径
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+
+def test_config_import():
+    """测试配置模块导入"""
+    from gems.config import Config
+    assert Config is not None
+
 
 def test_data_sources_import():
     """测试数据源模块导入"""
@@ -22,19 +28,21 @@ def test_tools_import():
     assert analyze_moat_characteristics is not None
 
 
-def test_output_import():
-    """测试输出模块导入"""
-    from gems.output.core import SimpleOutputEngine
-    assert SimpleOutputEngine is not None
+def test_schemas_import():
+    """测试数据模式导入"""
+    from gems.schemas import Task, TaskList
+    assert Task is not None
+    assert TaskList is not None
 
 
 if __name__ == "__main__":
-    print("Gems Agent 端到端测试")
+    print("Gems 核心模块测试")
     print("=" * 50)
     
+    test_config_import()
     test_data_sources_import()
     test_tools_import()
-    test_output_import()
+    test_schemas_import()
     
     print("\n" + "=" * 50)
-    print("所有模块导入测试通过")
+    print("所有核心模块导入测试通过")

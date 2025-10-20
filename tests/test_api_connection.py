@@ -23,16 +23,16 @@ if api_key:
     try:
         # 测试导入模型
         from gems.model import call_llm
-        print("✅ 模型导入成功")
+        print("模型导入成功")
         
         # 测试简单的API调用
-        print("🧪 测试API连接...")
+        print("测试API连接...")
         response = call_llm("你好，请简单回复'测试成功'")
-        print(f"✅ API调用成功: {response}")
+        print(f"API调用成功: {response}")
         
     except Exception as e:
-        print(f"❌ API调用失败: {e}")
+        print(f"API调用失败: {e}")
         import traceback
         traceback.print_exc()
 else:
-    print("❌ 未找到DEEPSEEK_API_KEY环境变量")
+    print("未找到DEEPSEEK_API_KEY环境变量")

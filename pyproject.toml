@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "gems"
 version = "0.1.0"
-description = "AI agent for financial analysis."
+description = "价值投资分析智能体"
 authors = []
 requires-python = ">=3.10"
 dependencies = [

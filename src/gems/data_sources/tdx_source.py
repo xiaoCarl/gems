@@ -6,7 +6,7 @@
 
 from typing import Dict, Any, Optional
 from gems.exceptions import DataSourceError
-from gems.logging import get_logger
+from gems.output.core import get_output_engine
 from gems.tools.tdx_api import get_tdx_realtime_data, test_tdx_connection
 from .base import DataSource
 
@@ -17,7 +17,7 @@ class TDXDataSource(DataSource):
     def __init__(self):
         self.name = "tdx"
         self.description = "通达信实时行情数据源"
-        self.logger = get_logger("tdx_source")
+        self.output = get_output_engine()
         self._available = None
         
     def is_available(self) -> bool:
@@ -26,11 +26,11 @@ class TDXDataSource(DataSource):
             try:
                 self._available = test_tdx_connection()
                 if self._available:
-                    self.logger.info("通达信数据源可用")
+                    self.output.show_progress("通达信数据源可用")
                 else:
-                    self.logger.warning("通达信数据源不可用")
+                    self.output.show_progress("通达信数据源不可用")
             except Exception as e:
-                self.logger.warning("通达信数据源检查失败", error=str(e))
+                self.output.show_progress(f"通达信数据源检查失败: {str(e)}")
                 self._available = False
         return self._available
     
@@ -48,7 +48,7 @@ class TDXDataSource(DataSource):
             DataSourceError: 当获取数据失败时
         """
         try:
-            self.logger.info("通过通达信获取实时数据", symbol=symbol)
+            self.output.show_progress(f"通过通达信获取实时数据 - 股票: {symbol}")
             
             data = get_tdx_realtime_data(symbol)
             if not data:
@@ -58,11 +58,8 @@ class TDXDataSource(DataSource):
             if data.get('current_price', 0) <= 0:
                 raise DataSourceError(f"通达信返回的价格数据无效: {data.get('current_price')}")
                 
-            self.logger.info(
-                "通达信实时数据获取成功", 
-                symbol=symbol,
-                price=data.get('current_price'),
-                change_percent=data.get('change_percent')
+            self.output.show_progress(
+                f"通达信实时数据获取成功 - 股票: {symbol}, 价格: {data.get('current_price')}, 涨跌幅: {data.get('change_percent')}"
             )
             
             return data

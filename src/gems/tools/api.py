@@ -16,16 +16,6 @@ class FinancialStatementsInput(BaseModel):
     report_period_lte: Optional[str] = Field(default=None, description="Optional fitler to retrieve financial statements less than or equal to the specified report period.")
 
 
-def _create_params(
-    symbol: str,
-    freq: Literal["annual", "quarterly"],
-    statement: str,
-    limit: int = 10
-) -> dict:
-    """Helper function to create params dict for FinnHub API calls."""
-    params = {"symbol": symbol, "freq": freq, "statement": statement}
-    return params
-
 @tool(args_schema=FinancialStatementsInput)
 def get_income_statements(
     ticker: str,

@@ -4,7 +4,7 @@
 from typing import Dict, Any, Optional
 from gems.data_sources.manager import data_source_manager
 from gems.exceptions import DataSourceError, FinancialDataError
-from gems.logging import get_logger
+from gems.output.core import get_output_engine
 
 
 def get_realtime_stock_data(symbol: str, data_source: Optional[str] = None) -> Dict[str, Any]:
@@ -47,7 +47,7 @@ def get_stock_valuation_data(symbol: str) -> Dict[str, Any]:
     Returns:
         包含PE、PB等估值指标的字典
     """
-    logger = get_logger("valuation")
+    output = get_output_engine()
     
     try:
         # 获取财务数据
@@ -80,10 +80,8 @@ def get_stock_valuation_data(symbol: str) -> Dict[str, Any]:
         if not latest_balance:
             latest_balance = financial_data["balance_sheets"][0]
         
-        logger.info(
-            "使用财务报告数据",
-            income_report_date=latest_income.get('报告日', '未知'),
-            balance_report_date=latest_balance.get('报告日', '未知')
+        output.show_progress(
+            f"使用财务报告数据 - 利润表: {latest_income.get('报告日', '未知')}, 资产负债表: {latest_balance.get('报告日', '未知')}"
         )
         
         # 提取关键财务指标
@@ -122,11 +120,11 @@ def get_stock_valuation_data(symbol: str) -> Dict[str, Any]:
                 current_price = realtime_data.get('prev_close', 0.0)
                 if current_price <= 0:
                     raise FinancialDataError("实时股价和前收盘价都无效")
-                logger.info("使用前收盘价", price=current_price)
+                output.show_progress(f"使用前收盘价: {current_price}")
             else:
-                logger.info("使用实时股价", price=current_price)
+                output.show_progress(f"使用实时股价: {current_price}")
         except Exception as e:
-            logger.warning("获取实时股价失败", error=str(e))
+            output.show_progress(f"获取实时股价失败: {str(e)}")
             # 使用典型价格进行计算
             if symbol == "600519.SH":
                 current_price = 1600.0  # 贵州茅台的典型价格
@@ -136,7 +134,7 @@ def get_stock_valuation_data(symbol: str) -> Dict[str, Any]:
                 current_price = 35.0    # 招商银行的典型价格
             else:
                 current_price = 10.0    # 默认典型价格
-            logger.info("使用典型价格进行计算", price=current_price)
+            output.show_progress(f"使用典型价格进行计算: {current_price}")
         
         # 计算估值指标
         eps = net_profit / total_shares
@@ -165,7 +163,7 @@ def get_stock_valuation_data(symbol: str) -> Dict[str, Any]:
                 dividend_per_share = dividends_paid / total_shares
                 dividend_yield = (dividend_per_share / current_price) * 100
         except Exception as e:
-            logger.warning("计算股息率失败", error=str(e))
+            output.show_progress(f"计算股息率失败: {str(e)}")
         
         # 验证计算结果
         if pe_ratio <= 0 or pb_ratio <= 0:

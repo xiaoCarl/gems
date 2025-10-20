@@ -4,7 +4,7 @@
 from typing import Dict, Any, Optional, List
 from gems.config import config
 from gems.exceptions import DataSourceError
-from gems.logging import get_logger
+from gems.output.core import get_output_engine
 from .base import DataSource
 from .akshare_source import AkShareDataSource
 from .yfinance_source import YFinanceDataSource
@@ -20,7 +20,7 @@ class DataSourceManager:
             "yfinance": YFinanceDataSource(),
             "tdx": TDXDataSource(),
         }
-        self.logger = get_logger("data_sources")
+        self.output = get_output_engine()
         self._initialize_sources()
     
     def _initialize_sources(self) -> None:
@@ -29,9 +29,9 @@ class DataSourceManager:
         for name, source in self.sources.items():
             try:
                 available = source.is_available()
-                self.logger.info(f"数据源 {name}: {'可用' if available else '不可用'}")
+                self.output.show_progress(f"数据源 {name}: {'可用' if available else '不可用'}")
             except Exception as e:
-                self.logger.error(f"检查数据源 {name} 可用性失败", error=str(e))
+                self.output.show_progress(f"检查数据源 {name} 可用性失败: {str(e)}")
     
     def get_realtime_data(self, symbol: str, preferred_source: Optional[str] = None) -> Dict[str, Any]:
         """获取实时数据"""
@@ -54,11 +54,11 @@ class DataSourceManager:
                 try:
                     if source.is_available():
                         data = source.get_realtime_data(symbol)
-                        self.logger.info(f"使用数据源: {source_name}", symbol=symbol)
+                        self.output.show_progress(f"使用数据源: {source_name} - 股票: {symbol}")
                         return data
                 except Exception as e:
                     last_error = e
-                    self.logger.warning(f"数据源 {source_name} 失败", symbol=symbol, error=str(e))
+                    self.output.show_progress(f"数据源 {source_name} 失败 - 股票: {symbol}, 错误: {str(e)}")
         
         if last_error:
             raise DataSourceError(f"所有数据源都失败，最后错误: {last_error}")

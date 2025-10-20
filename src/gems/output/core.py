@@ -37,7 +37,7 @@ class SimpleOutputEngine:
     ╚██████╔╝  ███████╗  ██║ ╚═╝ ██║  ███████║
     ╚═════╝   ╚══════╝  ╚═╝     ╚═╝  ╚══════╝
 
-                     好生意，好价格   
+                 好生意       好价格   
 
 请输入股票名称或者代码，或者输入'exit'或'quit'退出。
 """
@@ -61,7 +61,7 @@ class SimpleOutputEngine:
         print("计划任务")
         print("-" * 40)
         for i, task in enumerate(tasks, 1):
-            status = "✅" if task.get('done', False) else "⏳"
+            status = "✅" if task.get('done', False) else "【】"
             desc = task.get('description', str(task))
             print(f"{status} {i}. {desc}")
         print()
