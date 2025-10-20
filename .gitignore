@@ -26,6 +26,8 @@ wheels/
 *.egg
 *.tgz
 .coverage
+.pytest_cache/
+
 
 # Virtual environments
 venv/

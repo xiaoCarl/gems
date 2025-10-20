@@ -43,13 +43,6 @@ class SimpleOutputEngine:
 """
         print(welcome_text)
     
-    def show_query(self, query: str):
-        """显示用户查询"""
-        print()
-        print("您")
-        print()
-        print(query)
-        print()
     
     def show_tasks(self, tasks: List[Dict[str, Any]]):
         """显示任务列表"""
@@ -84,17 +77,6 @@ class SimpleOutputEngine:
         print(formatted_answer)
         print()
     
-    def show_info(self, message: str):
-        """显示信息消息"""
-        print(f"ℹ {message}")
-    
-    def show_warning(self, message: str):
-        """显示警告消息"""
-        print(f"⚠ {message}")
-    
-    def show_error(self, message: str):
-        """显示错误消息"""
-        print(f"✗ {message}")
     
     def _format_long_text(self, text: str, max_width: int = 80) -> str:
         """
