@@ -115,6 +115,7 @@ class MockLLM:
                 content="分析进行中...",
                 tool_calls=[
                     {
+                        "id": "call_001",
                         "name": "get_company_info",
                         "args": {"symbol": "AAPL"}
                     }

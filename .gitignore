@@ -25,6 +25,7 @@ wheels/
 .installed.cfg
 *.egg
 *.tgz
+.coverage
 
 # Virtual environments
 venv/
