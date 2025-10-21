@@ -118,7 +118,10 @@ class ValuationDataInput(BaseModel):
 @tool(args_schema=ValuationDataInput)
 def get_stock_valuation(ticker: str) -> dict:
     """
-    直接从AkShare获取股票最新估值数据，包括PE、PB、股息率等指标。
+    获取股票最新估值数据，包括PE、PB、股息率等指标。
+    
+    注意：此工具是获取估值数据的主要工具，直接基于财务数据和实时股价计算。
+    不需要调用其他估值分析工具。
     
     返回包含以下估值数据的字典：
     - PE Ratio：市盈率

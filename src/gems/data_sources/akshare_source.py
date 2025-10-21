@@ -126,4 +126,7 @@ class AkShareDataSource(DataSource):
     
     def is_available(self) -> bool:
         """检查数据源是否可用"""
+        if self._available is None:
+            from .availability import availability_tester
+            self._available, _ = availability_tester.test_akshare_availability()
         return self._available

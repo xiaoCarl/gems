@@ -20,6 +20,20 @@
 - **Dependencies**: Check pyproject.toml before adding new packages
 - **Type Issues**: Fix type errors in agent.py (TOOLS access, AIMessage attributes)
 
+## Cache Configuration
+- **Cache Strategy**: Memory + Disk hybrid cache with LRU eviction
+- **Cache TTL**: 
+  - Real-time data: 5 minutes (300 seconds)
+  - Financial data: 1 hour (3600 seconds)  
+  - Historical data: 24 hours (86400 seconds)
+- **Cache Keys**: `{data_type}:{symbol}:{period}?{params}`
+- **Environment Variables**:
+  - `CACHE_ENABLED=true/false` (default: true)
+  - `CACHE_TTL_REALTIME=300`
+  - `CACHE_TTL_FINANCIAL=3600`
+  - `CACHE_TTL_HISTORICAL=86400`
+  - `CACHE_MAX_SIZE=1000`
+
 ## GitHub Operations
 - **GitHub Commits**: ALL GitHub commits require explicit user instruction before execution
 - **Commit Process**: 

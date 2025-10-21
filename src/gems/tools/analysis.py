@@ -167,6 +167,10 @@ def compute_valuation_ratios(ticker: str, period: Literal["annual", "quarterly"]
     """
     计算估值比率，基于财务数据和估值数据进行价值投资分析。
     
+    注意：此工具用于深度估值分析，包含估值评估和投资建议。
+    如果只需要基础估值数据（PE、PB等），请使用get_stock_valuation工具。
+    这两个工具功能互补，不会相互调用。
+    
     分析内容：
     1. 获取最新PE、PB、ROE等估值指标
     2. 基于财务数据进行深度分析
