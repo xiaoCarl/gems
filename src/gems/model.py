@@ -10,8 +10,8 @@ from langchain_core.tools import BaseTool
 from langchain_core.messages import AIMessage
 from langchain_core.runnables import Runnable
 
-
 from gems.prompts import DEFAULT_SYSTEM_PROMPT
+from gems.logging import get_logger
 
 # Determine which model to use based on environment variables
 def _get_llm():
@@ -44,6 +44,8 @@ def call_llm(
     output_schema: Optional[Type[BaseModel]] = None,
     tools: Optional[List[BaseTool]] = None,
 ) -> Any:
+    logger = get_logger("model")
+    
     final_system_prompt = system_prompt if system_prompt else DEFAULT_SYSTEM_PROMPT
 
     prompt_template = ChatPromptTemplate.from_messages([
@@ -62,10 +64,35 @@ def call_llm(
     # Retry logic for transient connection errors
     for attempt in range(3):
         try:
+            start_time = time.time()
+            logger.debug(
+                "LLM调用开始",
+                attempt=attempt + 1,
+                output_schema=output_schema.__name__ if output_schema else None,
+                tools_count=len(tools) if tools else 0
+            )
+            
             result = chain.invoke({"prompt": prompt})
+            duration = time.time() - start_time
+            
+            logger.debug(
+                "LLM调用成功",
+                attempt=attempt + 1,
+                duration=f"{duration:.2f}s",
+                result_type=type(result).__name__
+            )
             return result
         except Exception as e:
+            duration = time.time() - start_time
+            logger.warning(
+                "LLM调用失败",
+                attempt=attempt + 1,
+                error=str(e),
+                duration=f"{duration:.2f}s"
+            )
+            
             if attempt == 2:  # Last attempt
+                logger.error("LLM调用最终失败", error=str(e))
                 raise
             time.sleep(0.5 * (2 ** attempt))  # 0.5s, 1s backoff
 

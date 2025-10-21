@@ -20,7 +20,12 @@ class Config:
     RETRY_DELAY: float = float(os.getenv("RETRY_DELAY", "1.0"))
     
     # 日志配置
-    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "WARNING")
+    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "info")
+    #LOG_ENABLE_DEBUG: bool = os.getenv("LOG_ENABLE_DEBUG", "false").lower() == "true"
+    LOG_TO_CONSOLE: bool = False
+    LOG_FILE_PATH: str = os.getenv("LOG_FILE_PATH", "logs/gems.log")
+    LOG_MAX_BYTES: int = int(os.getenv("LOG_MAX_BYTES", "10485760"))  # 10MB
+    LOG_BACKUP_COUNT: int = int(os.getenv("LOG_BACKUP_COUNT", "5"))
     
     # 数据源可用性标志
     TDX_AVAILABLE: bool = True  # 在运行时动态检查
@@ -55,6 +60,12 @@ class Config:
         
         if cls.CACHE_MAX_SIZE <= 0:
             raise ValueError("CACHE_MAX_SIZE must be positive")
+        
+        if cls.LOG_MAX_BYTES <= 0:
+            raise ValueError("LOG_MAX_BYTES must be positive")
+        
+        if cls.LOG_BACKUP_COUNT < 0:
+            raise ValueError("LOG_BACKUP_COUNT must be non-negative")
 
 
 # 全局配置实例
