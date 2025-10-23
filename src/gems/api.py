@@ -134,13 +134,22 @@ def _find_latest_annual_data(statements: list[dict]) -> dict | None:
     """查找最新的年度数据（12月31日）"""
     for statement in statements:
         report_date = statement.get("报告日", "")
-        if report_date and report_date.endswith("1231"):  # 年度报告
+        # 港股数据格式
+        if "REPORT_DATE" in statement:
+            report_date = statement.get("REPORT_DATE", "")
+
+        # A股格式: 20241231, 港股格式: 2024-12-31 00:00:00
+        if report_date and (report_date.endswith("1231") or "12-31" in report_date):  # 年度报告
             return statement
     return None
 
 
 def _extract_net_profit(income_statement: dict[str, Any]) -> float:
     """从利润表中提取净利润"""
+    # 港股数据格式
+    if "HOLDER_PROFIT" in income_statement:
+        return income_statement.get("HOLDER_PROFIT", 0)
+    # A股数据格式
     return income_statement.get(
         "归属于母公司所有者的净利润", 0
     ) or income_statement.get("净利润", 0)
@@ -148,6 +157,14 @@ def _extract_net_profit(income_statement: dict[str, Any]) -> float:
 
 def _extract_total_equity(balance_sheet: dict[str, Any]) -> float:
     """从资产负债表中提取股东权益"""
+    # 港股数据格式 - 通过每股净资产和已发行股本计算
+    if "每股净资产(元)" in balance_sheet and "已发行股本(股)" in balance_sheet:
+        bvps = balance_sheet.get("每股净资产(元)", 0)
+        shares = balance_sheet.get("已发行股本(股)", 0)
+        if bvps > 0 and shares > 0:
+            return bvps * shares
+
+    # A股数据格式
     return (
         balance_sheet.get("归属于母公司股东权益合计", 0)
         or balance_sheet.get("归属于母公司股东的权益", 0)
@@ -158,6 +175,10 @@ def _extract_total_equity(balance_sheet: dict[str, Any]) -> float:
 
 def _extract_total_shares(balance_sheet: dict[str, Any]) -> float:
     """从资产负债表中提取总股本"""
+    # 港股数据格式
+    if "已发行股本(股)" in balance_sheet:
+        return balance_sheet.get("已发行股本(股)", 0)
+    # A股数据格式
     return (
         balance_sheet.get("实收资本(或股本)", 0)
         or balance_sheet.get("股本", 0)

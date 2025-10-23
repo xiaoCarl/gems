@@ -292,7 +292,7 @@ class Agent:
             while per_task_steps < self.max_steps_per_task:
                 if step_count >= self.max_steps:
                     self.logger.warning("达到全局最大步数限制，停止执行")
-                    return
+                    break
 
                 # Ask the LLM for the next action to take for the current task.
                 ai_message = self.ask_for_actions(
