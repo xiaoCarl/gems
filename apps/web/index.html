@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gems投资分析助手</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #ffffff;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            padding: 20px 24px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        .connection-status {
+            position: absolute;
+            top: 20px;
+            right: 24px;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .connection-status.connected {
+            background: rgba(34, 197, 94, 0.2);
+            color: #16a34a;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .connection-status.disconnected {
+            background: rgba(239, 68, 68, 0.2);
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            background: #f8fafc;
+            scroll-behavior: smooth;
+        }
+
+        .messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .messages::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+
+        .messages::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .messages::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 24px;
+            animation: messageSlideIn 0.4s ease-out;
+        }
+
+        @keyframes messageSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin: 0 16px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: transform 0.2s ease;
+        }
+
+        .message:hover .message-avatar {
+            transform: scale(1.05);
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+        }
+
+        .message.assistant .message-avatar {
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+            color: white;
+        }
+
+        .message-content-wrapper {
+            max-width: 75%;
+            position: relative;
+        }
+
+        .message-content {
+            background: white;
+            padding: 16px 20px;
+            border-radius: 18px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            word-wrap: break-word;
+            line-height: 1.6;
+            font-size: 15px;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .message.assistant .message-content {
+            background: white;
+            border-left: 4px solid #7c3aed;
+        }
+
+        .message-content:hover {
+            box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+            transform: translateY(-1px);
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 6px;
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .message.user .message-time {
+            text-align: left;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .message.assistant .message-time {
+            color: #64748b;
+        }
+
+        /* 分析结果的特殊样式 */
+        .analysis-result {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border: 1px solid #cbd5e1;
+            border-left: 4px solid #059669;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 12px 0;
+        }
+
+        .analysis-section {
+            margin-bottom: 16px;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .analysis-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-weight: 600;
+            color: #059669;
+            font-size: 16px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-content {
+            color: #475569;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .highlight-box {
+            background: rgba(5, 150, 105, 0.1);
+            border: 1px solid rgba(5, 150, 105, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+        }
+
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .metric-item:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .metric-value {
+            font-weight: 600;
+            color: #059669;
+        }
+
+        /* 输入区域样式 */
+        .input-area {
+            padding: 24px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+        }
+
+        .status-indicator {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 12px;
+            text-align: center;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .status-indicator.active {
+            color: #059669;
+            font-weight: 600;
+        }
+
+        .status-indicator.error {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 4px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .input-container:focus-within {
+            border-color: #2563eb;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 12px;
+            resize: none;
+            font-family: inherit;
+            font-size: 15px;
+            line-height: 1.5;
+            max-height: 120px;
+            background: transparent;
+            color: #1e293b;
+            transition: all 0.3s ease;
+        }
+
+        .message-input:focus {
+            outline: none;
+            background: white;
+        }
+
+        .message-input::placeholder {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .send-button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .send-button:hover:not(:disabled) {
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .send-button:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #64748b;
+            font-style: italic;
+            font-size: 14px;
+        }
+
+        .loading-dots {
+            display: flex;
+            gap: 3px;
+        }
+
+        .loading-dot {
+            width: 6px;
+            height: 6px;
+            background: #64748b;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% {
+                transform: scale(0);
+            }
+            40% {
+                transform: scale(1);
+            }
+        }
+
+        /* 帮助文本 */
+        .help-text {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 12px;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .chat-container {
+                max-width: 100%;
+                border-radius: 0;
+                height: 100vh;
+            }
+
+            .header {
+                padding: 16px 20px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .messages {
+                padding: 16px;
+            }
+
+            .input-area {
+                padding: 16px;
+            }
+
+            .message-content-wrapper {
+                max-width: 85%;
+            }
+
+            .message-avatar {
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+            }
+        }
+
+        /* 暗色模式支持 */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            }
+
+            .chat-container {
+                background: #1e293b;
+            }
+
+            .messages {
+                background: #0f172a;
+            }
+
+            .message-content {
+                background: #334155;
+                color: #f1f5f9;
+                border-color: #475569;
+            }
+
+            .message.assistant .message-content {
+                background: #334155;
+                border-left-color: #8b5cf6;
+            }
+
+            .input-area {
+                background: #1e293b;
+                border-top-color: #334155;
+            }
+
+            .input-container {
+                background: #334155;
+                border-color: #475569;
+            }
+
+            .message-input {
+                color: #f1f5f9;
+            }
+
+            .message-input::placeholder {
+                color: #64748b;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="header">
+            <h1>
+                <span>🤖</span>
+                Gems投资分析助手
+            </h1>
+            <div class="header-subtitle">AI驱动的价值投资分析</div>
+            <div class="connection-status disconnected" id="connectionStatus">
+                未连接
+            </div>
+        </div>
+
+        <div class="messages" id="messages">
+            <div class="message assistant">
+                <div class="message-avatar">🤖</div>
+                <div class="message-content-wrapper">
+                    <div class="message-content">
+                        你好！我是Gems投资分析助手，专注于价值投资分析。💎
+
+                        我可以帮您：
+                        • 📊 分析股票投资价值
+                        • 🔍 评估公司基本面
+                        • 💰 计算估值指标
+                        • ⚠️ 提示投资风险
+
+                        请直接输入股票名称、代码或投资问题，例如：
+                        • "分析茅台股票"
+                        • "600519投资价值"
+                        • "腾讯控股怎么样"
+
+                        我将为您提供专业的价值投资分析！
+                    </div>
+                    <div class="message-time">刚刚</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <div class="status-indicator" id="statusIndicator"></div>
+            <div class="input-container">
+                <textarea
+                    id="messageInput"
+                    class="message-input"
+                    placeholder="输入股票名称、代码或投资问题..."
+                    rows="1"
+                ></textarea>
+                <button id="sendButton" class="send-button" onclick="sendMessage()">
+                    发送
+                </button>
+            </div>
+            <div class="help-text">按 Enter 发送，Shift + Enter 换行</div>
+        </div>
+    </div>
+
+    <script>
+        class ChatApp {
+            constructor() {
+                this.ws = null;
+                this.messages = [];
+                this.isLoading = false;
+                this.reconnectAttempts = 0;
+                this.maxReconnectAttempts = 5;
+
+                this.initializeElements();
+                this.setupEventListeners();
+                this.connectWebSocket();
+            }
+
+            initializeElements() {
+                this.messagesContainer = document.getElementById('messages');
+                this.messageInput = document.getElementById('messageInput');
+                this.sendButton = document.getElementById('sendButton');
+                this.statusIndicator = document.getElementById('statusIndicator');
+                this.connectionStatus = document.getElementById('connectionStatus');
+            }
+
+            setupEventListeners() {
+                this.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+
+                this.messageInput.addEventListener('input', () => {
+                    this.autoResize();
+                });
+
+                // 添加输入框聚焦效果
+                this.messageInput.addEventListener('focus', () => {
+                    this.messageInput.parentElement.classList.add('focused');
+                });
+
+                this.messageInput.addEventListener('blur', () => {
+                    this.messageInput.parentElement.classList.remove('focused');
+                });
+            }
+
+            connectWebSocket() {
+                try {
+                    this.ws = new WebSocket(`ws://${window.location.host}/ws`);
+
+                    this.ws.onopen = () => {
+                        console.log('WebSocket连接成功');
+                        this.reconnectAttempts = 0;
+                        this.updateConnectionStatus(true);
+                        this.hideStatus();
+                        this.addMessage("✅ 连接成功！现在可以开始分析了", 'assistant', 'system');
+                    };
+
+                    this.ws.onmessage = (event) => {
+                        const data = JSON.parse(event.data);
+                        this.handleMessage(data);
+                    };
+
+                    this.ws.onclose = () => {
+                        console.log('WebSocket连接关闭');
+                        this.updateConnectionStatus(false);
+                        this.attemptReconnect();
+                    };
+
+                    this.ws.onerror = (error) => {
+                        console.error('WebSocket错误:', error);
+                        this.updateConnectionStatus(false);
+                    };
+                } catch (error) {
+                    console.error('WebSocket连接失败:', error);
+                    this.updateConnectionStatus(false);
+                    this.attemptReconnect();
+                }
+            }
+
+            attemptReconnect() {
+                if (this.reconnectAttempts < this.maxReconnectAttempts) {
+                    this.reconnectAttempts++;
+                    this.showStatus(`正在重新连接... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+
+                    setTimeout(() => {
+                        console.log(`尝试重新连接 (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+                        this.connectWebSocket();
+                    }, 3000 * this.reconnectAttempts);
+                } else {
+                    this.showStatus('连接失败，请刷新页面重试');
+                }
+            }
+
+            updateConnectionStatus(connected) {
+                if (connected) {
+                    this.connectionStatus.textContent = '已连接';
+                    this.connectionStatus.className = 'connection-status connected';
+                    this.sendButton.disabled = false;
+                } else {
+                    this.connectionStatus.textContent = '未连接';
+                    this.connectionStatus.className = 'connection-status disconnected';
+                    this.sendButton.disabled = true;
+                }
+            }
+
+            autoResize() {
+                this.messageInput.style.height = 'auto';
+                this.messageInput.style.height = Math.min(this.messageInput.scrollHeight, 120) + 'px';
+            }
+
+            sendMessage() {
+                const message = this.messageInput.value.trim();
+                if (!message || this.isLoading || !this.ws || this.ws.readyState !== WebSocket.OPEN) {
+                    return;
+                }
+
+                // 添加用户消息
+                this.addMessage(message, 'user');
+
+                // 清空输入框
+                this.messageInput.value = '';
+                this.autoResize();
+
+                // 显示加载状态
+                this.showLoading();
+
+                // 发送消息到服务器
+                this.ws.send(JSON.stringify({
+                    type: 'message',
+                    content: message
+                }));
+            }
+
+            handleMessage(data) {
+                switch (data.type) {
+                    case 'response':
+                        this.hideLoading();
+                        this.addMessage(data.content, 'assistant');
+                        break;
+                    case 'status':
+                        this.showStatus(data.content);
+                        break;
+                    case 'error':
+                        this.hideLoading();
+                        this.addMessage(`❌ ${data.content}`, 'assistant', 'error');
+                        break;
+                    default:
+                        console.log('未知消息类型:', data.type);
+                }
+            }
+
+            addMessage(content, role, type = 'normal') {
+                const message = {
+                    id: Date.now(),
+                    content: content,
+                    role: role,
+                    type: type,
+                    timestamp: new Date()
+                };
+
+                this.messages.push(message);
+                this.renderMessage(message);
+                this.scrollToBottom();
+            }
+
+            renderMessage(message) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${message.role}`;
+
+                const avatar = message.role === 'user' ? '👤' : '🤖';
+                const time = message.timestamp.toLocaleTimeString('zh-CN', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                // 处理不同类型的消息内容
+                let contentHtml = '';
+                if (message.type === 'system') {
+                    contentHtml = `
+                        <div class="message-content" style="background: #f0f9ff; border-left: 4px solid #0ea5e9; color: #0284c7; font-size: 13px;">
+                            ${this.escapeHtml(message.content)}
+                        </div>
+                    `;
+                } else if (message.type === 'error') {
+                    contentHtml = `
+                        <div class="message-content" style="background: #fef2f2; border-left: 4px solid #dc2626; color: #dc2626; font-size: 13px;">
+                            ${this.escapeHtml(message.content)}
+                        </div>
+                    `;
+                } else {
+                    // 格式化和美化分析结果
+                    const formattedContent = this.formatAnalysisContent(message.content);
+                    contentHtml = `
+                        <div class="message-content">
+                            ${formattedContent}
+                        </div>
+                    `;
+                }
+
+                messageDiv.innerHTML = `
+                    <div class="message-avatar">${avatar}</div>
+                    <div class="message-content-wrapper">
+                        ${contentHtml}
+                        <div class="message-time">${time}</div>
+                    </div>
+                `;
+
+                this.messagesContainer.appendChild(messageDiv);
+            }
+
+            formatAnalysisContent(content) {
+                // 转义HTML
+                let formatted = this.escapeHtml(content);
+
+                // 处理分析报告的格式
+                if (formatted.includes('价值投资分析报告') || formatted.includes('🎯')) {
+                    // 添加图标和更好的格式
+                    formatted = formatted
+                        .replace(/🎯/g, '🎯')
+                        .replace(/【】/g, '☐')
+                        .replace(/✅/g, '✅')
+                        .replace(/→/g, '→')
+                        .replace(/开始执行:/g, '🚀')
+                        .replace(/完成:/g, '✅')
+                        .replace(/执行工具:/g, '🔧')
+                        .replace(/使用缓存/g, '💾')
+                        .replace(/工具执行完成:/g, '✅');
+
+                    // 添加更好的段落分隔
+                    formatted = formatted
+                        .replace(/\n\n/g, '\u003cbr\u003e\u003cbr\u003e')
+                        .replace(/\n/g, '\u003cbr\u003e');
+
+                    // 为标题添加样式
+                    formatted = formatted
+                        .replace(/\*\*(.*?)\*\*/g, '\u003cstrong style="color: #1e40af; font-size: 16px;"\u003e$1\u003c/strong\u003e')
+                        .replace(/\*(.*?)\*/g, '\u003cem style="color: #059669;"\u003e$1\u003c/em\u003e');
+
+                    // 为数字和百分比添加样式
+                    formatted = formatted
+                        .replace(/(\d+\.?\d*%?)/g, '\u003cspan style="color: #059669; font-weight: 600;"\u003e$1\u003c/span\u003e');
+
+                    // 为股票代码添加样式
+                    formatted = formatted
+                        .replace(/(\d{6}\.\w{2})/g, '\u003cspan style="background: #e0e7ff; padding: 2px 6px; border-radius: 4px; font-family: monospace;"\u003e$1\u003c/span\u003e');
+                }
+
+                // 处理普通消息
+                else {
+                    // 简单的格式优化
+                    formatted = formatted
+                        .replace(/\n\n/g, '\u003cbr\u003e\u003cbr\u003e')
+                        .replace(/\n/g, '\u003cbr\u003e');
+
+                    // 为emoji添加样式
+                    formatted = formatted
+                        .replace(/([💎🔍💰⚠️📊])/g, '\u003cspan style="font-size: 18px;"\u003e$1\u003c/span\u003e');
+                }
+
+                return formatted;
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            showLoading() {
+                this.isLoading = true;
+                this.sendButton.disabled = true;
+                this.sendButton.textContent = '分析中...';
+
+                const loadingDiv = document.createElement('div');
+                loadingDiv.className = 'message assistant';
+                loadingDiv.id = 'loadingMessage';
+                loadingDiv.innerHTML = `
+                    <div class="message-avatar">🤖</div>
+                    <div class="message-content-wrapper">
+                        <div class="message-content" style="background: #f8fafc; border-left: 4px solid #7c3aed; color: #64748b; font-style: italic;">
+                            <div class="loading">
+                                <span>正在分析中，请稍候</span>
+                                <div class="loading-dots">
+                                    <div class="loading-dot"></div>
+                                    <div class="loading-dot"></div>
+                                    <div class="loading-dot"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="message-time">${new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'})}</div>
+                    </div>
+                `;
+
+                this.messagesContainer.appendChild(loadingDiv);
+                this.scrollToBottom();
+            }
+
+            hideLoading() {
+                this.isLoading = false;
+                this.sendButton.disabled = false;
+                this.sendButton.textContent = '发送';
+
+                const loadingMessage = document.getElementById('loadingMessage');
+                if (loadingMessage) {
+                    loadingMessage.remove();
+                }
+            }
+
+            showStatus(text) {
+                this.statusIndicator.textContent = text;
+                this.statusIndicator.style.display = 'block';
+                this.statusIndicator.className = 'status-indicator active';
+            }
+
+            hideStatus() {
+                this.statusIndicator.style.display = 'none';
+            }
+
+            scrollToBottom() {
+                this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+            }
+        }
+
+        // 全局函数供HTML调用
+        function sendMessage() {
+            if (window.chatApp) {
+                window.chatApp.sendMessage();
+            }
+        }
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', () => {
+            window.chatApp = new ChatApp();
+        });
+    </script>
+</body>
+</html>

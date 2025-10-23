@@ -4,10 +4,24 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gems"
-version = "0.1.0"
-description = "价值投资分析智能体"
-authors = []
+version = "2.0.0"
+description = "基于价值投资理念的AI投资分析系统"
+authors = [{name = "Gems Team", email = "gems@example.com"}]
 requires-python = ">=3.10"
+readme = "README.md"
+license = {text = "MIT"}
+keywords = ["investment", "value-investing", "ai", "financial-analysis", "chinese-stocks"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Financial and Insurance Industry",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 dependencies = [
     "langchain>=0.3.27",
     "langchain-deepseek>=0.1.0",
@@ -20,13 +34,28 @@ dependencies = [
     "pytdx>=1.72",
     "yfinance>=0.2.66",
     "typing-extensions>=4.15.0",
+    "fastapi>=0.104.0",
+    "uvicorn>=0.24.0",
+    "python-multipart>=0.0.6",
 ]
 
+[project.urls]
+Homepage = "https://github.com/xiaoCarl/gems"
+Repository = "https://github.com/xiaoCarl/gems"
+Documentation = "https://github.com/xiaoCarl/gems#readme"
+"Bug Tracker" = "https://github.com/xiaoCarl/gems/issues"
+
 [project.scripts]
-gems-agent = "gems.cli:main"
+gems = "apps.cli.main:main"
+gems-server = "apps.servers.main:main"
+gems-web = "apps.servers.main:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+include = ["gems*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.md", "*.txt", "*.json"]
 
 [dependency-groups]
 dev = [
@@ -37,6 +66,48 @@ dev = [
     "black>=24.10.0",
     "isort>=5.13.2",
     "ruff>=0.9.4",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py310']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["gems"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 88
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
 ]
 
 [tool.mypy]
@@ -57,7 +128,19 @@ strict_equality = true
 [[tool.mypy.overrides]]
 module = [
     "akshare.*",
-    "yfinance.*", 
+    "yfinance.*",
     "pytdx.*",
 ]
 ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short --strict-markers"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]

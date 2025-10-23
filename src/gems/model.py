@@ -29,6 +29,8 @@ def _get_llm():
         
     # Default to DeepSeek
     api_key = os.getenv("DEEPSEEK_API_KEY")
+    print("api_key:")
+    print(api_key)
     return ChatDeepSeek(
         model="deepseek-chat", 
         temperature=0, 

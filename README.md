@@ -1,21 +1,30 @@
-# Gems 🤖 价值投资分析智能体
+# Gems 💎 AI投资分析助手
 
-Gems 是一个自主的价值投资研究智能体，能够自动规划任务、收集财务数据并生成投资分析报告。
+基于价值投资理念的AI投资分析系统，专为中文股票市场（A股和港股）设计。
 
-## 快速开始
+## 🌟 核心特性
+
+- **🤖 AI驱动分析** - 基于LangChain和深度学习的智能分析
+- **💎 价值投资框架** - 遵循巴菲特投资理念：好生意 + 好价格
+- **📊 多数据源整合** - AkShare、通达信、Yahoo Finance等数据源
+- **🌐 实时数据获取** - 股价、财务数据、估值指标
+- **💬 智能对话界面** - Web界面和命令行双模式支持
+- **⚡ 高性能缓存** - 混合缓存系统优化响应速度
+
+## 🚀 快速开始
 
 ### 安装
 
-#### 方法一：通过 npm 安装（推荐）
 ```bash
-npm install -g gems-agent
-```
-
-#### 方法二：从源码安装
-```bash
+# 克隆项目
 git clone https://github.com/xiaoCarl/gems.git
 cd gems
+
+# 安装依赖
 uv sync
+
+# 或者使用pip
+pip install -e .
 ```
 
 ### 配置
@@ -25,94 +34,180 @@ uv sync
 cp env.example .env
 ```
 
-2. 在 `.env` 文件中设置 API 密钥：
+2. 编辑 `.env` 文件，设置API密钥：
 ```bash
-# DeepSeek API（默认）
+# DeepSeek API（推荐）
 DEEPSEEK_API_KEY=your-deepseek-api-key
 
-# 或使用 Qwen API
+# 或者使用Qwen API
 USE_QWEN=true
 DASHSCOPE_API_KEY=your-dashscope-api-key
 ```
 
-### 使用
+### 启动
 
+#### Web界面模式（推荐）
 ```bash
-# 通过 npm 安装
-npm install -g gems-agent
-gems-agent
+# 启动Web服务器
+./start.sh web
 
-# 或从源码运行
-uv run gems-agent
+# 访问 http://localhost:8000
 ```
 
-## 功能特性
+#### 命令行模式
+```bash
+# 启动CLI
+./start.sh cli
+```
 
-### 🎯 核心能力
-- **智能任务规划** - 自动分解复杂投资问题
-- **自主数据收集** - 获取实时行情和财务数据
-- **价值投资分析** - 基于好生意+好价格框架
-- **安全执行** - 内置循环检测和步骤限制
+#### API服务模式
+```bash
+# 启动API服务器
+./start.sh api 8080
+```
 
-### 📊 数据源
-- **通达信API** - 实时行情数据（A股/港股）
-- **AkShare** - 财务数据（利润表、资产负债表、现金流量表）
-
-### 🤖 支持模型
-- **DeepSeek**（默认）- 设置 `DEEPSEEK_API_KEY`
-- **Qwen** - 设置 `USE_QWEN=true` 和 `DASHSCOPE_API_KEY`
-
-## 使用示例
-
-输入股票相关问题，例如：
-- "贵州茅台的市盈率和市净率是多少？"
-- "分析宁德时代的财务健康状况"
-- "腾讯控股的价值投资分析"
-
-Gems 将自动：
-1. 规划研究任务
-2. 收集财务数据
-3. 执行分析计算
-4. 生成投资报告
-
-## 价值投资框架
-
-Gems 基于经典价值投资理念，专注于：
-
-### 好生意
-- 护城河分析
-- 管理层质量
-- 业务简单易懂
-- 自由现金流
-
-### 好价格
-- 市盈率估值
-- 市净率估值
-- 资本回报率
-- 安全边际
-
-## 项目结构
+## 📁 项目结构
 
 ```
 gems/
-├── src/gems/
-│   ├── agent.py          # 主智能体
-│   ├── model.py          # LLM 模型接口
-│   ├── data_sources/     # 数据源管理
-│   ├── tools/           # 分析工具
-│   └── output/          # 输出引擎
-├── tests/               # 测试文件
-└── docs/               # 文档
+├── apps/                    # 应用程序入口
+│   ├── cli/                # 命令行界面
+│   ├── servers/            # Web服务器
+│   └── web/                # Web前端
+├── src/                    # 核心源码
+│   └── gems/               # 主要包
+│       ├── agent.py        # AI智能体
+│       ├── api.py          # 统一API接口
+│       ├── cli.py          # 命令行接口
+│       ├── config.py       # 配置管理
+│       ├── data_sources/   # 数据源管理
+│       ├── tools/          # 分析工具
+│       └── logging.py      # 日志系统
+├── docs/                   # 文档
+├── logs/                   # 日志文件
+├── tests/                  # 测试代码
+├── static/                 # 静态资源
+├── start.sh               # 统一启动脚本
+├── pyproject.toml         # Python项目配置
+└── README.md              # 项目文档
 ```
 
-## 贡献
+## 💡 使用示例
+
+### Web界面
+1. 打开浏览器访问 `http://localhost:8000`
+2. 在输入框中输入股票相关问题：
+   - "分析茅台股票"
+   - "600519的投资价值"
+   - "腾讯控股怎么样"
+3. 获得专业的价值投资分析报告
+
+### 命令行
+```bash
+# 分析股票
+$ gems
+> 分析茅台股票
+
+# 获取帮助
+$ gems --help
+```
+
+### API调用
+```bash
+# 搜索股票
+curl "http://localhost:8000/api/stocks/search?q=茅台"
+
+# 获取股票详情
+curl "http://localhost:8000/api/stocks/600519.SH"
+
+# 智能体分析
+curl -X POST "http://localhost:8000/api/agent/analyze" \
+  -H "Content-Type: application/json" \
+  -d '{"symbol": "600519.SH", "analysis_type": "comprehensive"}'
+```
+
+## 🎯 价值投资框架
+
+基于巴菲特和段永平的价值投资理念：
+
+### 好生意分析
+- **护城河** - 品牌、成本、转换成本、网络效应
+- **管理层** - 质量评估、股东利益一致性
+- **业务模式** - 简单易懂、聚焦主业
+- **现金流** - 自由现金流、现金储备
+
+### 好价格分析
+- **PE估值** - 市盈率相对历史区间
+- **PB估值** - 市净率与净资产质量
+- **ROE指标** - 净资产收益率持续性
+- **安全边际** - 价格相对内在价值的折扣
+
+## 🔧 开发
+
+### 代码质量
+```bash
+# 格式化代码
+black apps/ src/ tests/
+
+# 检查类型
+mypy src/
+
+# 运行测试
+pytest
+
+# 代码检查
+ruff check apps/ src/
+```
+
+### 项目配置
+- **代码格式化**: Black + isort
+- **类型检查**: MyPy
+- **代码检查**: Ruff
+- **测试框架**: Pytest
+
+## 📊 数据源
+
+- **AkShare** - A股和港股财务数据
+- **通达信** - 实时行情数据
+- **Yahoo Finance** - 港股和国际股票数据
+- **混合缓存** - 提升数据获取性能
+
+## 🛡️ 安全特性
+
+- **输入验证** - 严格的参数验证
+- **错误处理** - 完善的异常处理机制
+- **日志记录** - 详细的操作日志
+- **连接管理** - WebSocket连接安全
+
+## 📚 文档
+
+- [项目架构](docs/ARCHITECTURE.md) - 技术架构说明
+- [WebSocket设置](docs/WEBSOCKET_SETUP.md) - WebSocket配置
+- [界面优化](docs/INTERFACE_OPTIMIZATION_SUMMARY.md) - 界面设计
+
+## 🤝 贡献
 
 欢迎贡献！请：
+
 1. Fork 本仓库
-2. 创建功能分支
-3. 提交更改
-4. 创建 Pull Request
+2. 创建功能分支 (`git checkout -b feature/amazing-feature`)
+3. 提交更改 (`git commit -m 'Add some amazing feature'`)
+4. 推送到分支 (`git push origin feature/amazing-feature`)
+5. 创建 Pull Request
 
-## 许可证
+## 📝 许可证
 
-MIT License
+MIT License - 详见 [LICENSE](LICENSE) 文件
+
+## 🙏 致谢
+
+- [LangChain](https://langchain.com/) - AI应用框架
+- [AkShare](https://akshare.akfamily.xyz/) - 金融数据接口
+- [FastAPI](https://fastapi.tiangolo.com/) - Web框架
+- [DeepSeek](https://deepseek.com/) - AI模型支持
+
+---
+
+**💎 Gems - 让价值投资更智能！**
+
+专注于价值投资分析，助您做出更明智的投资决策。"file_path":"/Users/caihui/caihui/gems/README.md
