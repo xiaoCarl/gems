@@ -29,6 +29,7 @@ wheels/
 .pytest_cache/
 .cache/
 logs/
+.ruff_cache/
 
 # Virtual environments
 venv/

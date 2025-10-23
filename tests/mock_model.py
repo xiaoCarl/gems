@@ -5,34 +5,37 @@
 """
 
 import time
-from typing import Type, List, Optional, Union, Any
-from pydantic import BaseModel
-from langchain_core.tools import BaseTool
+from typing import Any
+
 from langchain_core.messages import AIMessage
+from langchain_core.tools import BaseTool
+from pydantic import BaseModel
 
 
 class MockLLM:
     """模拟LLM类"""
-    
+
     def __init__(self):
         self.model = "mock-deepseek-chat"
         self.temperature = 0
-    
-    def with_structured_output(self, output_schema: Type[BaseModel], method: str = "function_calling"):
+
+    def with_structured_output(
+        self, output_schema: type[BaseModel], method: str = "function_calling"
+    ):
         """模拟结构化输出"""
         return self
-    
-    def bind_tools(self, tools: List[BaseTool]):
+
+    def bind_tools(self, tools: list[BaseTool]):
         """模拟工具绑定"""
         return self
-    
+
     def invoke(self, input_data: dict) -> Any:
         """模拟调用"""
         prompt = input_data.get("prompt", "")
-        
+
         # 模拟处理时间
         time.sleep(0.5)
-        
+
         # 根据提示内容返回不同的模拟响应
         if "plan" in prompt.lower() or "task" in prompt.lower():
             # 模拟任务规划响应
@@ -40,7 +43,7 @@ class MockLLM:
                 "tasks": [
                     {"id": 1, "description": "获取公司基本信息", "done": False},
                     {"id": 2, "description": "分析财务数据", "done": False},
-                    {"id": 3, "description": "评估估值水平", "done": False}
+                    {"id": 3, "description": "评估估值水平", "done": False},
                 ]
             }
         elif "done" in prompt.lower():
@@ -117,9 +120,9 @@ class MockLLM:
                     {
                         "id": "call_001",
                         "name": "get_company_info",
-                        "args": {"symbol": "AAPL"}
+                        "args": {"symbol": "AAPL"},
                     }
-                ]
+                ],
             )
 
 
@@ -129,26 +132,26 @@ mock_llm = MockLLM()
 
 def call_llm(
     prompt: str,
-    system_prompt: Optional[str] = None,
-    output_schema: Optional[Type[BaseModel]] = None,
-    tools: Optional[List[BaseTool]] = None,
+    system_prompt: str | None = None,
+    output_schema: type[BaseModel] | None = None,
+    tools: list[BaseTool] | None = None,
 ) -> Any:
     """
     模拟LLM调用函数
-    
+
     在没有真实API密钥的情况下提供模拟响应。
     """
     print("🔧 使用模拟LLM进行测试...")
-    
+
     # 使用模拟LLM
     runnable = mock_llm
-    
+
     if output_schema:
         runnable = mock_llm.with_structured_output(output_schema)
     elif tools:
         runnable = mock_llm.bind_tools(tools)
-    
+
     # 模拟调用
     result = runnable.invoke({"prompt": prompt})
-    
+
     return result

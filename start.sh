@@ -7,7 +7,7 @@ set -e
 
 # 默认模式
 MODE="${1:-web}"
-PORT="${2:-8000}"
+PORT="${2:-8089}"
 
 # 颜色定义
 RED='\033[0;31m'
@@ -47,10 +47,10 @@ show_usage() {
     echo "  help    - 显示帮助信息"
     echo ""
     echo "端口选项:"
-    echo "  端口号   - 指定端口 (默认: 8000)"
+    echo "  端口号   - 指定端口 (默认: 8089)"
     echo ""
     echo "示例:"
-    echo "  $0 web 8000      # 启动Web界面，端口8000"
+    echo "  $0 web 8089      # 启动Web界面，端口8089"
     echo "  $0 cli           # 启动命令行界面"
     echo "  $0 api 8080      # 启动API服务器，端口8080"
 }

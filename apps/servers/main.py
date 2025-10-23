@@ -340,14 +340,14 @@ if __name__ == "__main__":
     logger.info("=" * 60)
     logger.info("启动Gems统一服务器")
     logger.info("=" * 60)
-    logger.info("🌐 Web界面: http://localhost:8000")
-    logger.info("📡 WebSocket: ws://localhost:8000/ws")
-    logger.info("❤️  健康检查: http://localhost:8000/health")
+    logger.info("🌐 Web界面: http://localhost:8089")
+    logger.info("📡 WebSocket: ws://localhost:8089/ws")
+    logger.info("❤️  健康检查: http://localhost:8089/health")
     logger.info("=" * 60)
 
     uvicorn.run(
         "apps.servers.main:app",
         host="0.0.0.0",
-        port=8000,
+        port=8089,
         log_level="info"
     )
