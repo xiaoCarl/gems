@@ -1,15 +1,17 @@
-# Gems 💎 AI投资分析助手
+# Gems Analyzer 💎
 
 基于价值投资理念的AI投资分析系统，专为中文股票市场（A股和港股）设计。
 
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ## 🌟 核心特性
 
-- **🤖 AI驱动分析** - 基于LangChain和深度学习的智能分析
+- **🤖 AI驱动分析** - 基于LangChain和DeepSeek/Qwen大模型的智能分析
 - **💎 价值投资框架** - 遵循巴菲特投资理念：好生意 + 好价格
-- **📊 多数据源整合** - AkShare、通达信、Yahoo Finance等数据源
-- **🌐 实时数据获取** - 股价、财务数据、估值指标
-- **💬 智能对话界面** - Web界面和命令行双模式支持
-- **⚡ 高性能缓存** - 混合缓存系统优化响应速度
+- **📊 多数据源整合** - AkShare实时数据，覆盖A股和港股
+- **⚡ 高性能缓存** - 智能缓存系统优化响应速度
+- **🔧 命令行工具** - 简洁高效的CLI交互体验
 
 ## 🚀 快速开始
 
@@ -17,173 +19,176 @@
 
 ```bash
 # 克隆项目
-git clone https://github.com/xiaoCarl/gems.git
-cd gems
+git clone https://github.com/xiaoCarl/gems-analyzer.git
+cd gems-analyzer
 
-# 安装依赖
+# 安装依赖（推荐uv）
 uv sync
 
-# 或者使用pip
+# 或使用pip
 pip install -e .
 ```
 
-### 配置
+### 配置API密钥
 
-1. 复制环境变量文件：
 ```bash
 cp env.example .env
-```
+# 编辑.env文件，添加以下任一API密钥：
 
-2. 编辑 `.env` 文件，设置API密钥：
-```bash
-# DeepSeek API（推荐）
+# 方式1: DeepSeek API（推荐）
 DEEPSEEK_API_KEY=your-deepseek-api-key
 
-# 或者使用Qwen API
+# 方式2: 阿里云Qwen API
 USE_QWEN=true
 DASHSCOPE_API_KEY=your-dashscope-api-key
 ```
 
-### 启动
+### 开始使用
 
-#### Web界面模式（推荐）
 ```bash
-# 启动Web服务器
-./start.sh web
+# 分析单只股票
+gems-analyzer 600519
 
-# 访问 http://localhost:8000
+# 分析港股
+gems-analyzer 00700.HK
+
+# 交互式分析模式
+gems-analyzer --interactive
+
+# 批量分析多只股
+gems-analyzer --batch 600519 000858 00700.HK
 ```
 
-#### 命令行模式
+## 📖 使用指南
+
+### 作为Kimi CLI Skill使用
+
+1. 安装Kimi CLI并配置
+2. 将此项目添加到skills目录
+3. Kimi会自动识别并调用相关功能
+
+### 命令行用法
+
 ```bash
-# 启动CLI
-./start.sh cli
-```
+# 快速分析
+gems-analyzer 600519                    # 分析贵州茅台
+gems-analyzer 600519 --json             # 输出JSON格式
+gems-analyzer 600519 --force            # 强制重新分析
 
-#### API服务模式
-```bash
-# 启动API服务器
-./start.sh api 8080
-```
-
-## 📁 项目结构
-
-```
-gems/
-├── apps/                    # 应用程序入口
-│   ├── cli/                # 命令行界面
-│   ├── servers/            # Web服务器
-│   └── web/                # Web前端
-├── src/                    # 核心源码
-│   └── gems/               # 主要包
-│       ├── agent.py        # AI智能体
-│       ├── api.py          # 统一API接口
-│       ├── cli.py          # 命令行接口
-│       ├── config.py       # 配置管理
-│       ├── data_sources/   # 数据源管理
-│       ├── tools/          # 分析工具
-│       └── logging.py      # 日志系统
-├── docs/                   # 文档
-├── logs/                   # 日志文件
-├── tests/                  # 测试代码
-├── static/                 # 静态资源
-├── start.sh               # 统一启动脚本
-├── pyproject.toml         # Python项目配置
-└── README.md              # 项目文档
-```
-
-## 💡 使用示例
-
-### Web界面
-1. 打开浏览器访问 `http://localhost:8000`
-2. 在输入框中输入股票相关问题：
-   - "分析茅台股票"
-   - "600519的投资价值"
-   - "腾讯控股怎么样"
-3. 获得专业的价值投资分析报告
-
-### 命令行
-```bash
-# 分析股票
-$ gems
-> 分析茅台股票
-
-# 获取帮助
-$ gems --help
-```
-
-### API调用
-```bash
 # 搜索股票
-curl "http://localhost:8000/api/stocks/search?q=茅台"
+gems-analyzer --search 茅台
 
-# 获取股票详情
-curl "http://localhost:8000/api/stocks/600519.SH"
+# 批量分析
+gems-analyzer --batch 600519 000858 --output report.md
 
-# 智能体分析
-curl -X POST "http://localhost:8000/api/agent/analyze" \
-  -H "Content-Type: application/json" \
-  -d '{"symbol": "600519.SH", "analysis_type": "comprehensive"}'
+# 交互式模式
+gems-analyzer --interactive
 ```
 
-## 🎯 价值投资框架
+### 股票代码格式
 
-基于巴菲特和段永平的价值投资理念：
+| 市场 | 格式示例 | 说明 |
+|-----|---------|------|
+| A股上海 | `600519.SH` 或 `600519` | 6开头为上海主板 |
+| A股深圳 | `000001.SZ` 或 `000001` | 0开头为深圳主板 |
+| A股创业板 | `300750.SZ` 或 `300750` | 3开头为创业板 |
+| 港股 | `00700.HK` 或 `00700` | 需带.HK后缀或自动识别 |
+
+## 💎 价值投资框架
 
 ### 好生意分析
+
 - **护城河** - 品牌、成本、转换成本、网络效应
 - **管理层** - 质量评估、股东利益一致性
 - **业务模式** - 简单易懂、聚焦主业
 - **现金流** - 自由现金流、现金储备
 
 ### 好价格分析
+
 - **PE估值** - 市盈率相对历史区间
 - **PB估值** - 市净率与净资产质量
 - **ROE指标** - 净资产收益率持续性
 - **安全边际** - 价格相对内在价值的折扣
 
-## 🔧 开发
+## 📁 项目结构
 
-### 代码质量
-```bash
-# 格式化代码
-black apps/ src/ tests/
-
-# 检查类型
-mypy src/
-
-# 运行测试
-pytest
-
-# 代码检查
-ruff check apps/ src/
+```
+gems-analyzer/
+├── SKILL.md                    # Kimi CLI Skill定义
+├── scripts/
+│   ├── gems-analyzer           # 主入口命令
+│   ├── analyze_stock.py        # 核心分析脚本
+│   ├── search_stock.py         # 股票搜索脚本
+│   └── batch_analyze.py        # 批量分析脚本
+├── src/gems/                   # 核心Python包
+│   ├── agent.py                # AI Agent核心
+│   ├── api.py                  # 统一API接口
+│   ├── model.py                # LLM模型配置
+│   ├── config.py               # 配置管理
+│   ├── data_sources/           # 数据源管理
+│   ├── cache/                  # 缓存系统
+│   └── tools/                  # 分析工具
+├── references/                 # 参考文档
+│   ├── stock_codes.md          # 股票代码速查
+│   ├── valuation_guide.md      # 估值指标说明
+│   └── api_reference.md        # API文档
+├── assets/                     # 资源文件
+│   └── report_template.md      # 报告模板
+├── pyproject.toml              # 项目配置
+└── README.md                   # 本文件
 ```
 
-### 项目配置
-- **代码格式化**: Black + isort
-- **类型检查**: MyPy
-- **代码检查**: Ruff
-- **测试框架**: Pytest
+## 🔧 开发指南
 
-## 📊 数据源
+### 代码质量
 
-- **AkShare** - A股和港股财务数据
-- **通达信** - 实时行情数据
-- **Yahoo Finance** - 港股和国际股票数据
-- **混合缓存** - 提升数据获取性能
+```bash
+# 格式化代码
+black scripts/ src/
 
-## 🛡️ 安全特性
+# 类型检查
+mypy src/
 
-- **输入验证** - 严格的参数验证
-- **错误处理** - 完善的异常处理机制
-- **日志记录** - 详细的操作日志
-- **连接管理** - WebSocket连接安全
+# 代码检查
+ruff check scripts/ src/
+```
 
-## 📚 文档
+### 添加新功能
 
-- [项目架构](docs/ARCHITECTURE.md) - 技术架构说明
-- [WebSocket设置](docs/WEBSOCKET_SETUP.md) - WebSocket配置
-- [界面优化](docs/INTERFACE_OPTIMIZATION_SUMMARY.md) - 界面设计
+1. **新数据源** - 在 `src/gems/data_sources/` 实现
+2. **新分析工具** - 创建脚本放入 `scripts/`
+3. **新模型支持** - 在 `src/gems/model.py` 添加配置
+
+## 📝 示例输出
+
+```markdown
+# 贵州茅台 (600519.SH) 价值投资分析
+
+## 核心估值指标
+
+| 指标 | 数值 | 评估 |
+|-----|------|------|
+| PE | 21.39 | 合理偏低 |
+| PB | 7.91 | 较高（品牌溢价）|
+| ROE | 36.99% | 优秀 |
+| 股息率 | 3.85% | 良好 |
+
+## 好生意分析
+
+### 护城河 - 极强 ⭐⭐⭐⭐⭐
+
+茅台拥有多重护城河：
+- 品牌护城河："国酒"地位，百年品牌积淀
+- 供给侧壁垒：核心产区稀缺性
+- 定价权：连续提价，毛利率91%+
+
+## 投资建议
+
+**评级：买入/持有**
+
+当前PE 21.39倍处于历史合理区间下限，ROE 36.99%体现极强的盈利能力。
+建议作为核心仓位长期持有。
+```
 
 ## 🤝 贡献
 
@@ -203,11 +208,10 @@ MIT License - 详见 [LICENSE](LICENSE) 文件
 
 - [LangChain](https://langchain.com/) - AI应用框架
 - [AkShare](https://akshare.akfamily.xyz/) - 金融数据接口
-- [FastAPI](https://fastapi.tiangolo.com/) - Web框架
 - [DeepSeek](https://deepseek.com/) - AI模型支持
 
 ---
 
-**💎 Gems - 让价值投资更智能！**
+**💎 Gems Analyzer - 让价值投资更智能！**
 
-专注于价值投资分析，助您做出更明智的投资决策。"file_path":"/Users/caihui/caihui/gems/README.md
+专注于价值投资分析，助您做出更明智的投资决策。

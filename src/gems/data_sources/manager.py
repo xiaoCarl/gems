@@ -5,130 +5,127 @@
 from typing import Any
 
 from gems.cache.manager import cache_manager
+from gems.config import config
 from gems.exceptions import DataSourceError
-from gems.output.core import get_output_engine
-
-from .akshare_source import AkShareDataSource
-from .tdx_source import TDXDataSource
-from .yfinance_source import YFinanceDataSource
 
 
 class DataSourceManager:
     """数据源管理器"""
-
+    
     def __init__(self):
-        self.sources = {
-            "akshare": AkShareDataSource(),
-            "yfinance": YFinanceDataSource(),
-            "tdx": TDXDataSource(),
-        }
-        self.output = get_output_engine()
-        self._initialize_sources()
-
-    def _initialize_sources(self) -> None:
-        """初始化数据源"""
-        # 检查各数据源可用性
-        for name, source in self.sources.items():
-            try:
-                available = source.is_available()
-                self.output.show_progress(
-                    f"数据源 {name}: {'可用' if available else '不可用'}"
-                )
-            except Exception as e:
-                self.output.show_progress(f"检查数据源 {name} 可用性失败: {str(e)}")
-
-    def get_realtime_data(
-        self, symbol: str, preferred_source: str | None = None
-    ) -> dict[str, Any]:
+        self._akshare = None
+        self._yfinance = None
+    
+    def _get_akshare(self):
+        """获取AkShare实例"""
+        if self._akshare is None:
+            import akshare as ak
+            self._akshare = ak
+        return self._akshare
+    
+    def get_realtime_data(self, symbol: str, data_source: str | None = None) -> dict[str, Any]:
         """获取实时数据"""
-        # 优先从缓存获取
-        cached_data = cache_manager.get_realtime_data(symbol)
-        if cached_data is not None:
-            # 检查缓存中是否是错误标记
-            if (
-                isinstance(cached_data, dict)
-                and cached_data.get("error") == "data_source_failed"
-            ):
-                # 缓存中存在失败标记，直接抛出异常
-                raise DataSourceError(
-                    f"缓存中记录数据源失败: {cached_data.get('last_error', '未知错误')}"
-                )
-
-            self.output.show_progress(f"使用缓存数据 - 股票: {symbol}")
-            return cached_data  # type: ignore
-
-        # 根据股票类型选择数据源策略
-        if symbol.endswith(".HK"):
-            # 港股优先使用通达信，其次yfinance
-            sources_order = ["tdx", "akshare"]
+        # 检查缓存
+        cached = cache_manager.get_realtime_data(symbol)
+        if cached:
+            return cached
+        
+        # 解析市场
+        if "." in symbol:
+            code, market = symbol.split(".")
         else:
-            # A股优先使用通达信，其次使用配置的优先数据源
-            sources_order = ["tdx", "akshare"]
-
-        last_error = None
-
-        for source_name in sources_order:
-            if source_name in self.sources:
-                source = self.sources[source_name]
-                try:
-                    if source.is_available():
-                        data = source.get_realtime_data(symbol)
-                        self.output.show_progress(
-                            f"使用数据源: {source_name} - 股票: {symbol}"
-                        )
-
-                        # 将数据写入缓存
-                        cache_manager.set_realtime_data(symbol, data)
-
-                        return data
-                except Exception as e:
-                    last_error = e
-                    self.output.show_progress(
-                        f"数据源 {source_name} 失败 - 股票: {symbol}, 错误: {str(e)}"
-                    )
-
-        if last_error:
-            # 在缓存中记录失败，避免重复尝试（使用较短的TTL，比如1分钟）
-            cache_manager.memory_cache.set(
-                cache_manager._generate_key("realtime", symbol),
-                {"error": "data_source_failed", "last_error": str(last_error)},
-                ttl=60,  # 1分钟TTL
-            )
-            raise DataSourceError(f"所有数据源都失败，最后错误: {last_error}")
-        else:
-            raise DataSourceError("没有可用的数据源")
-
-    def get_financial_data(self, symbol: str, period: str) -> dict[str, Any]:
+            code = symbol
+            market = "SH" if symbol.startswith("6") else "SZ"
+        
+        try:
+            ak = self._get_akshare()
+            
+            if market in ["SH", "SZ"]:
+                # A股
+                df = ak.stock_zh_a_spot_em()
+                row = df[df["代码"] == code]
+                if len(row) == 0:
+                    raise DataSourceError(f"股票 {symbol} 未找到")
+                
+                row = row.iloc[0]
+                result = {
+                    "symbol": symbol,
+                    "name": row.get("名称", ""),
+                    "current_price": float(row.get("最新价", 0)),
+                    "open": float(row.get("今开", 0)),
+                    "high": float(row.get("最高", 0)),
+                    "low": float(row.get("最低", 0)),
+                    "prev_close": float(row.get("昨收", 0)),
+                    "volume": int(row.get("成交量", 0)),
+                    "change_percent": float(row.get("涨跌幅", 0)),
+                }
+            else:
+                # 港股
+                df = ak.stock_hk_ggt_components_em()
+                row = df[df["代码"] == code]
+                if len(row) == 0:
+                    raise DataSourceError(f"股票 {symbol} 未找到")
+                
+                row = row.iloc[0]
+                result = {
+                    "symbol": symbol,
+                    "name": row.get("名称", ""),
+                    "current_price": float(row.get("最新价", 0)),
+                    "open": float(row.get("今开", 0)),
+                    "high": float(row.get("最高", 0)),
+                    "low": float(row.get("最低", 0)),
+                    "prev_close": float(row.get("昨收", 0)),
+                    "volume": int(row.get("成交量", 0)),
+                    "change_percent": float(row.get("涨跌幅", 0)),
+                }
+            
+            # 缓存结果
+            cache_manager.set_realtime_data(symbol, result)
+            return result
+            
+        except Exception as e:
+            raise DataSourceError(f"获取实时数据失败: {e}")
+    
+    def get_financial_data(self, symbol: str, period: str = "annual") -> dict[str, Any]:
         """获取财务数据"""
-        # 优先从缓存获取
-        cached_data = cache_manager.get_financial_data(symbol, period)
-        if cached_data is not None:
-            self.output.show_progress(
-                f"使用缓存财务数据 - 股票: {symbol}, 周期: {period}"
-            )
-            return cached_data  # type: ignore
+        # 检查缓存
+        cached = cache_manager.get_financial_data(symbol, period)
+        if cached:
+            return cached
+        
+        try:
+            ak = self._get_akshare()
+            
+            if "." in symbol:
+                code, market = symbol.split(".")
+            else:
+                code = symbol
+                market = "SH" if symbol.startswith("6") else "SZ"
+            
+            if market in ["SH", "SZ"]:
+                # A股财务数据
+                income = ak.stock_financial_report_sina(stock="profit", symbol=code)
+                balance = ak.stock_financial_report_sina(stock="balance", symbol=code)
+                cashflow = ak.stock_financial_report_sina(stock="cashflow", symbol=code)
+            else:
+                # 港股财务数据
+                income = ak.stock_financial_hk_report_em(stock="00700", symbol=code, indicator="年度报表")
+                balance = ak.stock_financial_hk_report_em(stock="00700", symbol=code, indicator="年度报表")
+                cashflow = ak.stock_financial_hk_report_em(stock="00700", symbol=code, indicator="年度报表")
+            
+            result = {
+                "income_statements": income.to_dict("records") if hasattr(income, "to_dict") else income,
+                "balance_sheets": balance.to_dict("records") if hasattr(balance, "to_dict") else balance,
+                "cash_flow_statements": cashflow.to_dict("records") if hasattr(cashflow, "to_dict") else cashflow,
+            }
+            
+            # 缓存结果
+            cache_manager.set_financial_data(symbol, period, result)
+            return result
+            
+        except Exception as e:
+            raise DataSourceError(f"获取财务数据失败: {e}")
 
-        # 财务数据主要使用AkShare
-        if "akshare" in self.sources:
-            source = self.sources["akshare"]
-            if source.is_available():
-                data = source.get_financial_data(symbol, period)
 
-                # 将数据写入缓存
-                cache_manager.set_financial_data(symbol, period, data)
-
-                return data
-
-        raise DataSourceError("AkShare数据源不可用，无法获取财务数据")
-
-    def get_available_sources(self) -> list[str]:
-        """获取可用数据源列表"""
-        available = []
-        for name, source in self.sources.items():
-            if source.is_available():
-                available.append(name)
-        return available
-
-
-# 全局数据源管理器实例
+# 全局数据源管理器
 data_source_manager = DataSourceManager()

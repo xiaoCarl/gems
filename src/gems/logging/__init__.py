@@ -1,9 +1,23 @@
 """
-统一日志模块
-
-提供统一的日志配置和管理，支持结构化日志输出。
+日志系统
 """
 
-from .core import Logger, get_logger
+import logging
+import sys
+from pathlib import Path
 
-__all__ = ["Logger", "get_logger"]
+
+def get_logger(name: str) -> logging.Logger:
+    """获取日志记录器"""
+    logger = logging.getLogger(name)
+    
+    if not logger.handlers:
+        handler = logging.StreamHandler(sys.stdout)
+        formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        )
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+        logger.setLevel(logging.INFO)
+    
+    return logger

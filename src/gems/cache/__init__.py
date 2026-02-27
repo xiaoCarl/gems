@@ -1,9 +1,7 @@
 """
-缓存模块
+缓存系统
 """
 
-from .base import Cache
-from .manager import CacheManager, cache_manager
-from .storage import DiskCache, MemoryCache
+from .manager import cache_manager
 
-__all__ = ["Cache", "CacheManager", "MemoryCache", "DiskCache", "cache_manager"]
+__all__ = ["cache_manager"]

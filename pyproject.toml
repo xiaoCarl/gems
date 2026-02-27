@@ -3,14 +3,14 @@ requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "gems"
+name = "gems-analyzer"
 version = "2.0.0"
-description = "基于价值投资理念的AI投资分析系统"
+description = "基于价值投资理念的AI投资分析系统 - Kimi CLI Skill"
 authors = [{name = "Gems Team", email = "gems@example.com"}]
 requires-python = ">=3.10"
 readme = "README.md"
 license = {text = "MIT"}
-keywords = ["investment", "value-investing", "ai", "financial-analysis", "chinese-stocks"]
+keywords = ["investment", "value-investing", "ai", "financial-analysis", "chinese-stocks", "kimi-skill"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Financial and Insurance Industry",
@@ -32,24 +32,16 @@ dependencies = [
     "requests>=2.32.5",
     "akshare>=1.15.0",
     "dashscope>=1.14.0",
-    "pytdx>=1.72",
-    "yfinance>=0.2.66",
-    "typing-extensions>=4.15.0",
-    "fastapi>=0.104.0",
-    "uvicorn>=0.24.0",
-    "python-multipart>=0.0.6",
 ]
 
 [project.urls]
-Homepage = "https://github.com/xiaoCarl/gems"
-Repository = "https://github.com/xiaoCarl/gems"
-Documentation = "https://github.com/xiaoCarl/gems#readme"
-"Bug Tracker" = "https://github.com/xiaoCarl/gems/issues"
+Homepage = "https://github.com/xiaoCarl/gems-analyzer"
+Repository = "https://github.com/xiaoCarl/gems-analyzer"
+Documentation = "https://github.com/xiaoCarl/gems-analyzer#readme"
+"Bug Tracker" = "https://github.com/xiaoCarl/gems-analyzer/issues"
 
 [project.scripts]
-gems = "apps.cli.main:main"
-gems-server = "apps.servers.main:main"
-gems-web = "apps.servers.main:main"
+gems-analyzer = "scripts.gems-analyzer:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -65,83 +57,23 @@ dev = [
     "pytest>=8.3.4",
     "pytest-cov>=6.0.0",
     "black>=24.10.0",
-    "isort>=5.13.2",
     "ruff>=0.9.4",
 ]
 
 [tool.black]
 line-length = 88
 target-version = ['py310']
-include = '\.pyi?$'
-extend-exclude = '''
-/(
-  # directories
-  \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | build
-  | dist
-)/
-'''
-
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-line_length = 88
-known_first_party = ["gems"]
 
 [tool.ruff]
 target-version = "py310"
 line-length = 88
-select = [
-    "E",  # pycodestyle errors
-    "W",  # pycodestyle warnings
-    "F",  # pyflakes
-    "I",  # isort
-    "B",  # flake8-bugbear
-    "C4", # flake8-comprehensions
-    "UP", # pyupgrade
-]
-ignore = [
-    "E501",  # line too long, handled by black
-    "B008",  # do not perform function calls in argument defaults
-    "C901",  # too complex
-]
 
 [tool.mypy]
 python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
-disallow_untyped_defs = false
-disallow_incomplete_defs = true
-check_untyped_defs = true
-disallow_untyped_decorators = true
-no_implicit_optional = true
-warn_redundant_casts = true
-warn_unused_ignores = true
-warn_no_return = true
-warn_unreachable = true
-strict_equality = true
-
-[[tool.mypy.overrides]]
-module = [
-    "akshare.*",
-    "yfinance.*",
-    "pytdx.*",
-]
-ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-python_files = ["test_*.py", "*_test.py"]
-python_classes = ["Test*"]
-python_functions = ["test_*"]
-addopts = "-v --tb=short --strict-markers"
-markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "integration: marks tests as integration tests",
-    "unit: marks tests as unit tests",
-]
+python_files = ["test_*.py"]
+addopts = "-v --tb=short"

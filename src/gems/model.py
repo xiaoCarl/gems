@@ -1,106 +1,84 @@
+"""
+LLM模型配置
+"""
+
 import os
-import time
-from typing import Any, cast
+from typing import Any, Type
 
-from langchain.prompts import ChatPromptTemplate
-from langchain_core.runnables import Runnable
-from langchain_core.tools import BaseTool
-from langchain_deepseek import ChatDeepSeek
-from langchain_qwq import ChatQwQ
-from pydantic import BaseModel, SecretStr
-
-from gems.logging import get_logger
-from gems.prompts import DEFAULT_SYSTEM_PROMPT
+from gems.config import config
 
 
-# Determine which model to use based on environment variables
-def _get_llm():
-    """Initialize the appropriate LLM based on environment variables."""
-    # Check for QwQ configuration
-    if os.getenv("USE_QWEN") == "true":
-        api_key = os.getenv("DASHSCOPE_API_KEY")
-        if not api_key:
-            raise ValueError(
-                "DASHSCOPE_API_KEY environment variable is required for QwQ"
-            )
-        return ChatQwQ(
-            model="qwen-plus",
-            temperature=float(os.getenv("QWQ_TEMPERATURE", "0")),
-            api_key=api_key,
+def call_llm(prompt: str, system_prompt: str | None = None, 
+             output_schema: Type | None = None, tools: list | None = None) -> Any:
+    """
+    调用LLM
+    
+    Args:
+        prompt: 用户提示词
+        system_prompt: 系统提示词
+        output_schema: 输出结构（Pydantic模型）
+        tools: 工具列表
+    
+    Returns:
+        LLM响应
+    """
+    if config.use_qwen and config.dashscope_api_key:
+        return _call_qwen(prompt, system_prompt, output_schema, tools)
+    elif config.deepseek_api_key:
+        return _call_deepseek(prompt, system_prompt, output_schema, tools)
+    else:
+        raise ValueError("未配置API密钥，请设置 DEEPSEEK_API_KEY 或 DASHSCOPE_API_KEY")
+
+
+def _call_deepseek(prompt: str, system_prompt: str | None = None,
+                   output_schema: Type | None = None, tools: list | None = None) -> Any:
+    """调用DeepSeek API"""
+    try:
+        from langchain_deepseek import ChatDeepSeek
+        
+        model = ChatDeepSeek(
+            model="deepseek-chat",
+            api_key=config.deepseek_api_key,
+            temperature=0.1,
         )
+        
+        if output_schema:
+            model = model.with_structured_output(output_schema)
+        
+        messages = []
+        if system_prompt:
+            messages.append(("system", system_prompt))
+        messages.append(("human", prompt))
+        
+        response = model.invoke(messages)
+        return response
+        
+    except Exception as e:
+        raise RuntimeError(f"DeepSeek API调用失败: {e}")
 
-    # Default to DeepSeek
-    api_key = os.getenv("DEEPSEEK_API_KEY")
-    return ChatDeepSeek(
-        model="deepseek-chat",
-        temperature=0,
-        api_key=SecretStr(api_key) if api_key else None,
-    )
 
-
-# Initialize the LLM
-llm = _get_llm()
-
-
-def call_llm(
-    prompt: str,
-    system_prompt: str | None = None,
-    output_schema: type[BaseModel] | None = None,
-    tools: list[BaseTool] | None = None,
-) -> Any:
-    logger = get_logger("model")
-
-    final_system_prompt = system_prompt if system_prompt else DEFAULT_SYSTEM_PROMPT
-
-    prompt_template = ChatPromptTemplate.from_messages(
-        [("system", final_system_prompt), ("user", "{prompt}")]
-    )
-
-    runnable: Runnable = cast(Runnable, llm)
-    if output_schema:
-        runnable = cast(
-            Runnable,
-            llm.with_structured_output(output_schema, method="function_calling"),
+def _call_qwen(prompt: str, system_prompt: str | None = None,
+               output_schema: Type | None = None, tools: list | None = None) -> Any:
+    """调用Qwen API"""
+    try:
+        from langchain_qwq import ChatQwen
+        
+        model = ChatQwen(
+            model="qwen-turbo",
+            api_key=config.dashscope_api_key,
+            temperature=0.1,
         )
-    elif tools:
-        runnable = cast(Runnable, llm.bind_tools(tools))
-
-    chain = prompt_template | runnable
-
-    # Retry logic for transient connection errors
-    for attempt in range(3):
-        try:
-            start_time = time.time()
-            logger.debug(
-                "LLM调用开始",
-                attempt=attempt + 1,
-                output_schema=output_schema.__name__ if output_schema else None,
-                tools_count=len(tools) if tools else 0,
-            )
-
-            result = chain.invoke({"prompt": prompt})
-            duration = time.time() - start_time
-
-            logger.debug(
-                "LLM调用成功",
-                attempt=attempt + 1,
-                duration=f"{duration:.2f}s",
-                result_type=type(result).__name__,
-            )
-            return result
-        except Exception as e:
-            duration = time.time() - start_time
-            logger.warning(
-                "LLM调用失败",
-                attempt=attempt + 1,
-                error=str(e),
-                duration=f"{duration:.2f}s",
-            )
-
-            if attempt == 2:  # Last attempt
-                logger.error("LLM调用最终失败", error=str(e))
-                raise
-            time.sleep(0.5 * (2**attempt))  # 0.5s, 1s backoff
-
-    # This should never be reached, but added for type safety
-    raise RuntimeError("Failed to get response after all retry attempts")
+        
+        if output_schema:
+            model = model.with_structured_output(output_schema)
+        
+        messages = []
+        if system_prompt:
+            messages.append(("system", system_prompt))
+        messages.append(("human", prompt))
+        
+        response = model.invoke(messages)
+        return response
+        
+    except Exception as e:
+        raise RuntimeError(f"Qwen API调用失败: {e}")

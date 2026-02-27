@@ -1,92 +1,39 @@
-from typing import Any
+"""
+数据模式定义
+"""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class Task(BaseModel):
-    """Represents a single task in a task list."""
-
-    id: int = Field(..., description="Unique identifier for the task.")
-    description: str = Field(..., description="The description of the task.")
-    done: bool = Field(False, description="Whether the task is completed.")
+    """任务"""
+    id: int
+    description: str
+    done: bool = False
 
 
 class TaskList(BaseModel):
-    """Represents a list of tasks."""
-
-    tasks: list[Task] = Field(..., description="The list of tasks.")
+    """任务列表"""
+    tasks: list[Task]
 
 
 class IsDone(BaseModel):
-    """Represents the boolean status of a task."""
-
-    done: bool = Field(..., description="Whether the task is done or not.")
+    """是否完成"""
+    done: bool
 
 
 class Answer(BaseModel):
-    """Represents an answer to the user's query."""
-
-    answer: str = Field(
-        ...,
-        description="A comprehensive answer to the user's query, including relevant numbers, data, reasoning, and insights.",
-    )
-
-
-class OptimizedToolArgs(BaseModel):
-    """Represents optimized arguments for a tool call."""
-
-    arguments: dict[str, Any] = Field(
-        ..., description="The optimized arguments dictionary for the tool call."
-    )
-
-
-class ValueInvestmentAssessment(BaseModel):
-    """Represents a comprehensive value investment assessment."""
-
-    good_business: str = Field(
-        ...,
-        description="Assessment of whether it's a good business, including moat, profitability, and business model analysis.",
-    )
-    good_price: str = Field(
-        ...,
-        description="Assessment of whether it's a good price, including valuation metrics, safety margin, and comparison analysis.",
-    )
-    long_term_risk: str = Field(
-        ...,
-        description="Assessment of long-term holding risks, including industry outlook, competition, and management quality.",
-    )
-    overall_recommendation: str = Field(
-        ...,
-        description="Overall investment recommendation based on the three dimensions.",
-    )
-
-
-class ValueInvestmentAnswer(BaseModel):
-    """Represents a comprehensive value investment answer."""
-
-    assessment: ValueInvestmentAssessment = Field(
-        ..., description="The value investment assessment across three dimensions."
-    )
-    summary: str = Field(
-        ..., description="A concise summary of the investment analysis."
-    )
-    key_metrics: dict[str, Any] = Field(
-        default_factory=dict, description="Key financial metrics used in the analysis."
-    )
+    """答案"""
+    answer: str
 
 
 class StockConfirmation(BaseModel):
-    """Represents stock information confirmation."""
+    """股票确认"""
+    stock_name: str | None = None
+    stock_code: str | None = None
+    clarification_needed: str | None = None
 
-    stock_name: str = Field(..., description="Confirmed stock name.")
-    stock_code: str = Field(
-        ...,
-        description="Confirmed stock code in standard format (e.g., 600519.SH, 000001.SZ, 00700.HK).",
-    )
-    analysis_type: str = Field(..., description="Type of analysis to be performed.")
-    analysis_dimensions: list[str] = Field(
-        ..., description="Key dimensions for analysis."
-    )
-    clarification_needed: str = Field(
-        "", description="Any clarification needed from user."
-    )
+
+class OptimizedToolArgs(BaseModel):
+    """优化的工具参数"""
+    arguments: dict
