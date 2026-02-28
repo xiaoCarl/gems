@@ -1,0 +1,139 @@
+{
+  "a_stocks": [
+    {
+      "symbol": "000001",
+      "name": "平安银行",
+      "industry": "银行",
+      "description": "中国平安保险集团旗下的商业银行"
+    },
+    {
+      "symbol": "000002",
+      "name": "万科A",
+      "industry": "房地产",
+      "description": "中国领先的房地产开发商"
+    },
+    {
+      "symbol": "600519",
+      "name": "贵州茅台",
+      "industry": "白酒",
+      "description": "中国高端白酒龙头企业"
+    },
+    {
+      "symbol": "600036",
+      "name": "招商银行",
+      "industry": "银行",
+      "description": "中国领先的商业银行"
+    },
+    {
+      "symbol": "000858",
+      "name": "五粮液",
+      "industry": "白酒",
+      "description": "中国著名白酒品牌"
+    }
+  ],
+  "hk_stocks": [
+    {
+      "symbol": "00700",
+      "name": "腾讯控股",
+      "industry": "互联网",
+      "description": "中国领先的互联网综合服务提供商"
+    },
+    {
+      "symbol": "00939",
+      "name": "建设银行",
+      "industry": "银行",
+      "description": "中国四大国有商业银行之一"
+    },
+    {
+      "symbol": "01398",
+      "name": "工商银行",
+      "industry": "银行",
+      "description": "全球最大的商业银行"
+    },
+    {
+      "symbol": "02318",
+      "name": "中国平安",
+      "industry": "保险",
+      "description": "中国领先的保险金融集团"
+    },
+    {
+      "symbol": "00883",
+      "name": "中国海洋石油",
+      "industry": "能源",
+      "description": "中国最大的海上原油及天然气生产商"
+    }
+  ],
+  "analysis_examples": [
+    {
+      "symbol": "000001",
+      "market": "A",
+      "expected_pe": 5.0,
+      "expected_pb": 0.5,
+      "description": "银行股通常低PE低PB"
+    },
+    {
+      "symbol": "600519",
+      "market": "A",
+      "expected_pe": 30.0,
+      "expected_pb": 10.0,
+      "description": "消费龙头通常高PE高PB"
+    },
+    {
+      "symbol": "00700",
+      "market": "HK",
+      "expected_pe": 25.0,
+      "expected_pb": 6.0,
+      "description": "科技股通常较高估值"
+    }
+  ],
+  "valuation_ranges": {
+    "pe": {
+      "very_low": "< 10",
+      "low": "10 - 15",
+      "normal": "15 - 25",
+      "high": "25 - 40",
+      "very_high": "> 40"
+    },
+    "pb": {
+      "very_low": "< 0.8",
+      "low": "0.8 - 1.2",
+      "normal": "1.2 - 2.0",
+      "high": "2.0 - 4.0",
+      "very_high": "> 4.0"
+    },
+    "dividend_yield": {
+      "very_low": "< 1%",
+      "low": "1% - 2%",
+      "normal": "2% - 4%",
+      "high": "4% - 6%",
+      "very_high": "> 6%"
+    }
+  },
+  "industry_averages": {
+    "banking": {
+      "pe": 6.5,
+      "pb": 0.7,
+      "dividend_yield": 5.2
+    },
+    "real_estate": {
+      "pe": 8.2,
+      "pb": 1.1,
+      "dividend_yield": 4.8
+    },
+    "technology": {
+      "pe": 28.5,
+      "pb": 5.2,
+      "dividend_yield": 0.8
+    },
+    "consumer": {
+      "pe": 25.3,
+      "pb": 6.8,
+      "dividend_yield": 1.5
+    },
+    "energy": {
+      "pe": 12.4,
+      "pb": 1.3,
+      "dividend_yield": 3.2
+    }
+  }
+}

@@ -1,245 +1,216 @@
----
-name: gems-analyzer
-description: |
-  基于价值投资理念的AI投资分析系统，专为中文股票市场（A股和港股）设计。
-  使用时机：
-  1. 用户需要分析A股或港股的投资价值时（如"分析茅台股票"、"腾讯投资价值"）
-  2. 用户询问股票估值指标（PE、PB、ROE、股息率等）时
-  3. 用户需要基于巴菲特价值投资理念的股票分析报告时
-  4. 用户需要获取股票实时行情或财务数据时
-  5. 命令行工具以 gems-analyzer 开头时
----
+# Gems - A股和港股价值投资分析工具
 
-# Gems Analyzer - AI价值投资分析工具
+## 概述
 
-基于LangChain和价值投资理念的股票分析系统，支持A股和港股。
+Gems是一个基于tushare和akshare的A股和港股价值投资分析工具，提供全面的股票基本面分析、估值指标计算和投资建议。该工具旨在帮助投资者进行价值投资决策，通过量化分析识别具有投资价值的股票。
+
+## 功能特性
+
+### 核心功能
+1. **多市场支持**: 同时支持A股和港股市场分析
+2. **实时数据**: 通过tushare和akshare获取实时行情数据
+3. **财务分析**: 完整的财务报表分析（利润表、资产负债表、现金流量表）
+4. **估值模型**: 多种估值模型计算（PE、PB、PS、PEG、DCF等）
+5. **投资建议**: 基于多因子模型的智能投资建议
+6. **风险提示**: 自动识别财务风险和市场风险
+
+### 技术特性
+1. **模块化设计**: 清晰的模块划分，易于扩展和维护
+2. **缓存机制**: 智能缓存减少API调用，提高性能
+3. **配置驱动**: 支持环境变量和配置文件多种配置方式
+4. **完整日志**: 详细的日志记录，便于调试和监控
+5. **多种输出格式**: 支持文本、JSON、HTML、PDF等多种输出格式
 
 ## 快速开始
 
-### 1. 配置API密钥
+### 环境要求
+- Python 3.8+
+- tushare token（需要注册获取）
+- 网络连接（用于获取实时数据）
 
+### 安装步骤
 ```bash
-cp env.example .env
-# 编辑 .env 文件，添加以下任一API密钥：
-# DEEPSEEK_API_KEY=your-deepseek-api-key
-# 或
-# USE_QWEN=true
-# DASHSCOPE_API_KEY=your-dashscope-api-key
+# 进入skill目录
+cd /path/to/gems
+
+# 安装依赖
+pip install -r requirements.txt
+
+# 配置环境变量
+cp .env.example .env
+# 编辑.env文件，添加你的tushare token
 ```
 
-### 2. 安装依赖
+### 基本使用
+```python
+# 导入分析器
+from src.analysis.value_investing import ValueInvestingAnalyzer
 
-```bash
-# 使用 uv（推荐）
-uv sync
+# 创建分析器
+analyzer = ValueInvestingAnalyzer()
 
-# 或使用 pip
-pip install -e .
+# 分析A股股票
+result = analyzer.analyze_stock("000001", market="A")
+print(result.summary())
+
+# 分析港股股票
+result = analyzer.analyze_stock("00700", market="HK")
+print(result.summary())
 ```
-
-### 3. 开始分析
-
-```bash
-# 分析单只股票
-gems-analyzer 600519
-
-# 分析港股
-gems-analyzer 00700.HK
-
-# 交互式分析
-gems-analyzer --interactive
-```
-
-## 使用方式
-
-### 方式一：快速单次分析（推荐）
-
-适用于快速获取单只股票的投资分析报告。
-
-```bash
-# 分析A股
-gems-analyzer 600519
-
-# 分析港股
-gems-analyzer 00700.HK
-
-# 输出JSON格式
-gems-analyzer 600519 --json
-
-# 指定数据源
-gems-analyzer 600519 --source akshare
-
-# 强制重新分析（忽略缓存）
-gems-analyzer 600519 --force
-```
-
-### 方式二：交互式深度分析
-
-适用于多轮对话、深度追问的场景。
-
-```bash
-gems-analyzer --interactive
-```
-
-交互模式提示词示例：
-- "分析茅台的护城河"
-- "对比茅台和五粮液的估值"
-- "腾讯的分红情况如何"
-
-### 方式三：批量分析
-
-同时分析多只股票并生成对比报告。
-
-```bash
-# 批量分析
-gems-analyzer --batch 600519 000858 00700.HK
-
-# 输出到文件
-gems-analyzer --batch 600519 000858 --output report.md
-```
-
-## 股票代码格式
-
-| 市场 | 格式示例 | 说明 |
-|-----|---------|------|
-| A股上海 | `600519.SH` 或 `600519` | 6开头为上海主板 |
-| A股深圳 | `000001.SZ` 或 `000001` | 0开头为深圳主板 |
-| A股创业板 | `300750.SZ` 或 `300750` | 3开头为创业板 |
-| 港股 | `00700.HK` 或 `00700` | 需带.HK后缀或自动识别 |
-
-股票代码模糊匹配规则：
-- 纯数字6开头 → 自动添加 `.SH`
-- 纯数字0/3开头 → 自动添加 `.SZ`
-- 包含.HK或纯数字5位 → 识别为港股
-
-## 输出格式说明
-
-### Markdown报告（默认）
-
-包含以下章节：
-1. **股票基本信息** - 代码、名称、当前价格
-2. **好生意分析** - 护城河、管理层、业务模式、现金流
-3. **好价格分析** - PE/PB估值、ROE、安全边际
-4. **投资建议** - 综合评估、仓位建议、风险提示
-
-### JSON结构化数据
-
-```json
-{
-  "symbol": "600519.SH",
-  "stock_name": "贵州茅台",
-  "current_price": 1600.00,
-  "valuation": {
-    "pe_ratio": 28.5,
-    "pb_ratio": 8.2,
-    "roe": 28.0,
-    "dividend_yield": 1.5
-  },
-  "business_quality": "excellent",
-  "price_assessment": "fair",
-  "recommendation": "适合长期持有"
-}
-```
-
-## 缓存策略
-
-系统自动缓存分析结果24小时。
-
-缓存命中时的处理：
-1. **提示用户**："该股票24小时内已分析过，使用缓存结果"
-2. **询问用户**："是否重新分析获取最新数据？(y/n)"
-3. **强制刷新**：`gems-analyzer 600519 --force`
-
-## 故障排除
-
-| 问题 | 解决方案 |
-|-----|---------|
-| API密钥错误 | 检查 `.env` 文件中的 `DEEPSEEK_API_KEY` 或 `DASHSCOPE_API_KEY` |
-| 数据源连接失败 | 尝试切换数据源：`--source akshare` 或 `--source tdx` |
-| 股票代码找不到 | 使用 `gems-analyzer --search 茅台` 搜索正确代码 |
-| 分析结果为空 | 检查网络连接，或查看日志 |
-
-## 参考资源
-
-- **股票代码速查**：参见 [references/stock_codes.md](references/stock_codes.md)
-- **估值指标说明**：参见 [references/valuation_guide.md](references/valuation_guide.md)
-- **API详细文档**：参见 [references/api_reference.md](references/api_reference.md)
 
 ## 项目结构
 
 ```
-gems-analyzer/
-├── SKILL.md                    # 核心指导文档
-├── scripts/
-│   ├── gems-analyzer           # 主入口命令
-│   ├── analyze_stock.py        # 核心分析脚本
-│   ├── search_stock.py         # 股票搜索脚本
-│   └── batch_analyze.py        # 批量分析脚本
-├── references/
-│   ├── stock_codes.md          # 常用股票代码速查
-│   ├── valuation_guide.md      # 估值指标说明
-│   └── api_reference.md        # API详细文档
-├── assets/
-│   └── report_template.md      # 分析报告模板
-├── pyproject.toml              # Python项目配置
-├── env.example                 # 环境变量示例
-└── README.md                   # 项目文档
+gems/
+├── src/                    # 源代码目录
+│   ├── data_sources/      # 数据源模块
+│   ├── analysis/          # 分析模块
+│   ├── utils/            # 工具模块
+│   └── cli.py            # 命令行接口
+├── scripts/               # 脚本目录
+├── references/            # 参考文档
+├── assets/               # 资源文件
+├── requirements.txt      # Python依赖
+├── .env.example          # 环境变量示例
+├── SKILL.md             # 技能说明（本文件）
+└── README.md            # 项目说明
 ```
 
-## 核心功能模块
+## 详细文档
 
-| 模块 | 功能 | 路径 |
-|-----|------|------|
-| 数据源管理 | 多数据源自动切换和故障转移 | `gems/data_sources/` |
-| AI Agent | 基于LangChain的任务规划和执行 | `gems/agent.py` |
-| 估值计算 | PE/PB/ROE等核心指标计算 | `gems/api.py` |
-| 缓存系统 | 多级缓存优化响应速度 | `gems/cache/` |
-| 日志系统 | 结构化日志记录 | `gems/logging/` |
+### 数据源
+- **tushare**: A股数据接口，提供股票基本信息、财务数据、行情数据
+- **akshare**: 港股数据接口，提供港股基本信息、财务数据、行情数据
 
-## 价值投资框架
+### 分析方法
+1. **估值分析**: PE、PB、PS、PEG、股息率等指标计算
+2. **财务分析**: ROE、ROA、毛利率、负债率、流动比率等分析
+3. **成长性分析**: 营收增长率、净利润增长率、净资产增长率
+4. **综合评分**: 基于多因子模型的股票综合评分
 
-基于巴菲特和段永平的投资理念：
+### 投资建议
+- **评分系统**: 0-100分综合评分
+- **建议等级**: 强烈买入、买入、持有、卖出、强烈卖出
+- **理由生成**: 自动生成推荐理由和风险提示
+- **报告输出**: 支持文本、JSON、HTML格式报告
 
-### 好生意（Good Business）
-- **护城河** - 品牌、成本、转换成本、网络效应
-- **管理层** - 质量评估、股东利益一致性
-- **业务模式** - 简单易懂、聚焦主业
-- **现金流** - 自由现金流、现金储备
+## 使用示例
 
-### 好价格（Good Price）
-- **PE估值** - 市盈率相对历史区间
-- **PB估值** - 市净率与净资产质量
-- **ROE指标** - 净资产收益率持续性
-- **安全边际** - 价格相对内在价值的折扣
+### 示例1: 单只股票分析
+```python
+from src.analysis.value_investing import ValueInvestingAnalyzer
+
+analyzer = ValueInvestingAnalyzer()
+result = analyzer.analyze_stock("000001", market="A")
+
+# 输出文本摘要
+print(result.summary())
+
+# 输出JSON格式
+import json
+print(json.dumps(result.to_dict(), indent=2, ensure_ascii=False))
+
+# 生成HTML报告
+html_report = analyzer.generate_report(result, "html")
+with open("report.html", "w", encoding="utf-8") as f:
+    f.write(html_report)
+```
+
+### 示例2: 批量分析
+```python
+from src.analysis.value_investing import ValueInvestingAnalyzer
+
+analyzer = ValueInvestingAnalyzer()
+symbols = ["000001", "000002", "600519"]  # 平安银行、万科A、贵州茅台
+results = analyzer.batch_analyze(symbols, market="A")
+
+# 按评分排序输出
+for i, result in enumerate(results, 1):
+    print(f"{i}. {result.name} ({result.symbol}): {result.overall_score:.1f}分 - {result.recommendation.value}")
+```
+
+### 示例3: 命令行使用
+```bash
+# 分析单只股票
+python src/cli.py analyze 000001 --market A
+
+# 批量分析
+python src/cli.py batch-analyze --file stocks.txt --market HK
+
+# 生成报告
+python src/cli.py report 00700 --market HK --output report.html
+```
+
+## 配置说明
+
+### 环境变量配置
+创建`.env`文件：
+```env
+# tushare配置（必填）
+TUSHARE_TOKEN=your_tushare_token_here
+
+# 缓存配置（可选）
+CACHE_ENABLED=true
+CACHE_TTL=3600
+
+# 日志配置（可选）
+LOG_LEVEL=INFO
+LOG_FILE=logs/gems.log
+
+# 分析阈值配置（可选）
+ANALYSIS_PE_THRESHOLD=20
+ANALYSIS_PB_THRESHOLD=2
+ANALYSIS_ROE_THRESHOLD=15
+```
+
+### 配置文件
+也可以通过`config.yaml`进行配置（详见assets/config.yaml）：
+```yaml
+data_sources:
+  tushare:
+    token: your_tushare_token_here
+    timeout: 30
+
+analysis:
+  weights:
+    valuation: 0.4
+    financial: 0.4
+    growth: 0.2
+```
 
 ## 开发指南
 
-### 代码质量
-
+### 代码规范
 ```bash
-# 格式化代码
-black scripts/ src/
-
-# 检查类型
-mypy src/
-
-# 运行测试
-pytest
+# 代码格式化
+black src
 
 # 代码检查
-ruff check scripts/ src/
+flake8 src
+
+# 类型检查
+mypy src
 ```
 
-### 添加新功能
+### 测试
+```bash
+# 运行测试
+pytest tests/
 
-1. **新数据源**：在 `gems/data_sources/` 实现 `DataSource` 抽象基类
-2. **新分析工具**：创建脚本放入 `scripts/`，遵循现有错误处理模式
-3. **新模型支持**：在 `gems/model.py` 添加模型配置
+# 生成测试覆盖率报告
+pytest --cov=src --cov-report=html
+```
 
 ## 许可证
 
-MIT License
+本项目采用MIT许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
 
----
+## 免责声明
 
-**💎 Gems Analyzer - 让价值投资更智能！**
+本工具仅供学习和研究使用，不构成投资建议。股市有风险，投资需谨慎。使用者应自行承担投资风险，作者不对任何投资损失负责。
+
+## 联系方式
+
+如有问题或建议，请通过以下方式联系：
+- GitHub Issues: [项目Issues页面](https://github.com/yourusername/gems/issues)
+- Email: your.email@example.com
